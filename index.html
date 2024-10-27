@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrewBoy v1</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to the CSS file -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon"> <!-- Link to the favicon -->
+</head>
+<body>
+    <h1>BrewBoy v1</h1>
+    <div class="input-container">
+        <div>
+            <label for="dose">Dose (g):</label>
+            <input type="number" id="dose" placeholder="Enter dose in grams">
+        </div>
+        <div>
+            <label for="ratio">Ratio:</label>
+            <input type="number" id="ratio" placeholder="Enter ratio (e.g., 15)">
+        </div>
+        <div>
+            <label for="water-output">Water:</label>
+            <input type="text" id="water-output" readonly>
+        </div>
+    </div>
+    <button id="calculate">Calculate</button>
+
+    <h2 class="hidden" id="results-header">Calculated Amounts</h2>
+    <table id="result-table" class="hidden" border="1">
+        <thead>
+            <tr>
+                <th>Standard</th>
+                <th>Sweeter</th>
+                <th>Brighter</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Results will be filled in here -->
+        </tbody>
+    </table>
+
+    <script>
+        function updateWaterOutput() {
+            const dose = parseFloat(document.getElementById('dose').value);
+            const ratio = parseFloat(document.getElementById('ratio').value);
+            const waterOutput = document.getElementById('water-output');
+
+            // Calculate total water based on dose and ratio
+            if (!isNaN(dose) && !isNaN(ratio) && dose > 0 && ratio > 0) {
+                const totalWater = Math.round(dose * ratio); // Round to nearest whole number
+                waterOutput.value = totalWater + 'g'; // Set the output value with 'g'
+            } else {
+                waterOutput.value = ''; // Clear the output if inputs are invalid
+            }
+        }
+
+        document.getElementById('dose').addEventListener('input', updateWaterOutput);
+        document.getElementById('ratio').addEventListener('input', updateWaterOutput);
+
+        document.getElementById('calculate').addEventListener('click', function() {
+            const dose = parseFloat(document.getElementById('dose').value);
+            const ratio = parseFloat(document.getElementById('ratio').value);
+            const tableBody = document.getElementById('result-table').getElementsByTagName('tbody')[0];
+            const resultsHeader = document.getElementById('results-header');
+
+            // Clear previous results
+            tableBody.innerHTML = '';
+
+            // Check for valid input
+            if (isNaN(dose) || isNaN(ratio) || dose <= 0 || ratio <= 0) {
+                alert('Please enter valid positive numbers for dose and ratio.');
+                return;
+            }
+
+            // Show the results header and table
+            resultsHeader.classList.remove('hidden');
+            document.getElementById('result-table').classList.remove('hidden');
+
+            // Predefined percentage values
+            const percentages = [
+                [20, 16.67, 23.33],
+                [20, 23.33, 16.67],
+                [0, 0, 0], // This will be replaced with the text
+                [60, 30, 20],
+                [0, 30, 20],
+                [0, 0, 20]
+            ];
+
+            // Calculate and display results for each predefined percentage
+            percentages.forEach((row, rowIndex) => {
+                const tr = tableBody.insertRow();
+                if (rowIndex === 2) { // For the empty row, add a specific class
+                    tr.classList.add('note-row'); // Add the class to style this row
+                }
+                row.forEach((percentage, index) => {
+                    const newCell = tr.insertCell();
+                    if (percentage !== 0) { // Only calculate for non-zero percentages
+                        const result = Math.round(dose * ratio * (percentage / 100)); // Round to nearest whole number
+                        newCell.innerText = result + 'g'; // Insert rounded value with 'g'
+                    } else if (rowIndex === 2) { // For the row with notes
+                        const notes = ["<strong>Lighter</strong>", "<strong>Stronger</strong>", "<strong>Strongerer</strong>"];
+                        newCell.innerHTML = notes[index]; // Use innerHTML to insert bold notes
+                    } else {
+                        newCell.innerText = ''; // Leave blank for other empty cells
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

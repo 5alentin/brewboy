@@ -1,0 +1,91 @@
+body {
+    background-color: #1e1e1e; /* Dark background */
+    color: #f0f0f0; /* Light text color */
+    font-family: 'ＭＳ ゴシック', sans-serif; /* Default font */
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    font-family: 'Meiryo UI', sans-serif; /* Title font */
+    color: #ffffff; /* White color for title */
+    margin-bottom: 20px; /* Space below title */
+}
+
+.input-container {
+    display: flex; /* Use flexbox for the input container */
+    align-items: center; /* Center vertically */
+    margin-bottom: 20px; /* Space below inputs */
+}
+
+.input-container div {
+    margin-right: 10px; /* Space between input elements */
+}
+
+input[type="number"] {
+    padding: 10px; /* Padding inside inputs */
+    border: 1px solid #444; /* Dark border */
+    border-radius: 4px; /* Rounded corners */
+    background-color: #333; /* Dark input background */
+    color: #f0f0f0; /* Light input text */
+}
+
+input[type="number"]::placeholder {
+    color: #888; /* Placeholder text color */
+}
+
+button {
+    padding: 10px 15px; /* Padding for the button */
+    border: none; /* No border */
+    border-radius: 4px; /* Rounded corners */
+    background-color: #4f43ae; /* Button color */
+    color: #fff; /* Button text color */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Transition effect */
+}
+
+button:hover {
+    background-color: #0056b3; /* Darker button color on hover */
+}
+
+table {
+    width: 80%; /* Set the table width to 80% of the parent container */
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #2a2a2a; /* Dark table background */
+}
+
+th, td {
+    text-align: center; /* Center the text in table cells */
+    padding: 8px;
+    border: 1px solid #444; /* Dark border for table cells */
+}
+
+th {
+    background-color: #444; /* Darker background for table header */
+}
+
+td {
+    color: #f0f0f0; /* Light text color for table cells */
+}
+
+#water-output {
+    border: 1px solid #444; /* Dark border */
+    padding: 10px; /* Padding inside the output box */
+    width: 100px; /* Fixed width for water output */
+    text-align: center; /* Center the text */
+    background-color: #333; /* Dark background for water output */
+    color: #f0f0f0; /* Light text color */
+    margin-left: 5px; /* Space between label and output */
+}
+
+.hidden {
+    display: none; /* Hide elements with this class */
+}
+
+.note-row {
+    background-color: #555; /* Match the header color for the note row */
+}
