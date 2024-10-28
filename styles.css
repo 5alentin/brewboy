@@ -10,7 +10,7 @@ body {
 }
 
 h1 {
-    font-family: 'Meiryo UI', sans-serif; /* Title font */
+    font-family: 'Courier New', monospace; /* Title font */
     color: #ffffff; /* White color for title */
     margin-bottom: 20px; /* Space below title */
 }
@@ -48,7 +48,7 @@ button {
 }
 
 button:hover {
-    background-color: #0056b3; /* Darker button color on hover */
+    background-color: #b5b6e4; /* Darker button color on hover */
 }
 
 table {
