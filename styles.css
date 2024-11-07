@@ -18,19 +18,24 @@ h1 {
 .input-container {
     display: flex; /* Use flexbox for the input container */
     align-items: center; /* Center vertically */
+    flex-wrap: wrap; /* Allow input elements to wrap on smaller screens */
+    justify-content: center; /* Center inputs horizontally */
     margin-bottom: 20px; /* Space below inputs */
 }
 
 .input-container div {
     margin-right: 10px; /* Space between input elements */
+    margin-bottom: 10px; /* Space between rows of inputs on small screens */
 }
 
-input[type="number"] {
+input[type="number"], #water-output {
     padding: 10px; /* Padding inside inputs */
     border: 1px solid #444; /* Dark border */
     border-radius: 4px; /* Rounded corners */
     background-color: #333; /* Dark input background */
     color: #f0f0f0; /* Light input text */
+    width: 100%; /* Make inputs take full width of container */
+    max-width: 250px; /* Limit the maximum width */
 }
 
 input[type="number"]::placeholder {
@@ -40,11 +45,13 @@ input[type="number"]::placeholder {
 button {
     padding: 10px 15px; /* Padding for the button */
     border: none; /* No border */
-    border-radius: 4px; /* Rounded corners */
+    border-radius: 10px; /* Rounded corners */
     background-color: #4f43ae; /* Button color */
     color: #fff; /* Button text color */
     cursor: pointer; /* Pointer cursor on hover */
     transition: background-color 0.3s; /* Transition effect */
+    width: 50%; /* Make button take full width on mobile */
+    max-width: 250px; /* Limit the maximum width */
 }
 
 button:hover {
@@ -75,7 +82,7 @@ td {
 #water-output {
     border: 1px solid #444; /* Dark border */
     padding: 10px; /* Padding inside the output box */
-    width: 100px; /* Fixed width for water output */
+    width: 100%; /* Full width of container */
     text-align: center; /* Center the text */
     background-color: #333; /* Dark background for water output */
     color: #f0f0f0; /* Light text color */
@@ -88,4 +95,128 @@ td {
 
 .note-row {
     background-color: #555; /* Match the header color for the note row */
+}
+
+/* Hamburger Menu Styles */
+.hamburger-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+.hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.hamburger .bar {
+    background-color: #fff;
+    height: 4px;
+    width: 100%;
+    border-radius: 2px;
+}
+
+.menu {
+    position: absolute;
+    top: 50px;
+    left: 0;
+    right: 0;
+    background-color: #333;
+    padding: 20px;
+    display: none; /* Hidden by default */
+}
+
+.menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.menu ul li {
+    margin: 10px 0;
+}
+
+.menu ul li a {
+    text-decoration: none;
+    color: #fff;
+    font-size: 18px;
+}
+
+/* Show menu when hamburger icon is clicked */
+.menu.active {
+    display: block;
+}
+
+/* Mobile Styles */
+@media (max-width: 600px) {
+    body {
+        padding: 10px 15px; /* Add padding to the left and right to avoid being too close to the edges */
+    }
+
+    h1 {
+        font-size: 24px; /* Reduce title size for mobile */
+        text-align: center; /* Center the title */
+    }
+
+    .input-container {
+        justify-content: center; /* Center the inputs */
+        padding: 10px;
+        width: 90%; /* Ensure container doesnt take up full width */
+        background-color: #4B8F29; /* Green GameBoy screen background */
+        border-radius: 10px; /* Rounded corners to match the GameBoy style */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.6); /* Add shadow for depth */
+        border: 2px solid #A1D46E; /* Light green border color to mimic the GameBoy look */
+    }
+
+    .input-container div {
+        margin-right: 0;
+        width: 100%; /* Make inputs take full width of container */
+    }
+
+    input[type="number"], #water-output, button {
+        width: 50%; /* Ensure inputs and button take up the full width */
+        max-width: 100%; /* Remove any max-width constraints */
+        margin-bottom: 10px; /* Add some spacing between inputs */
+        background-color: #6E9F43; /* Lighter green for input backgrounds */
+    }
+
+    button {
+        background-color: #4f43ae; /* Ensure button remains purple */
+        width: 50%; /* Ensure button doesnt take up the full width on mobile */
+        max-width: 100%; /* Remove any max-width constraints */
+        margin-top: 10px; /* Add space between the button and inputs */
+    }
+}
+
+@media (min-width: 601px) {
+    /* Keep inputs next to each other on larger screens */
+    .input-container {
+        justify-content: flex-start; /* Align inputs to the left */
+        width: auto;
+    }
+
+    .input-container div {
+        margin-right: 10px; /* Keep some space between inputs */
+        width: auto; /* Allow inputs to be inline */
+    }
+
+    input[type="number"], #water-output {
+        width: auto; /* Allow inputs to be their natural size */
+    }
+
+    button {
+        width: auto; /* Button width stays as natural size */
+    }
 }

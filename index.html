@@ -3,20 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BrewBoy v1</title>
+    <title>BrewBoy v1.1</title>
     <link rel="stylesheet" href="styles.css"> <!-- Link to the CSS file -->
     <link rel="icon" href="favicon.ico" type="image/x-icon"> <!-- Link to the favicon -->
 </head>
 <body>
-    <h1>BrewBoy v1</h1>
+  <div class="hamburger-container">
+    <div class="hamburger" id="hamburger-icon">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+    </div>
+    <nav class="menu" id="menu">
+        <ul>
+            <li><a href="index.html">BrewBoy</a></li>
+            <li><a href="MR_TDS.html">MR.TDS</a></li>
+        </ul>
+    </nav>
+</div>
+    <h1>BrewBoy v1.1</h1>
     <div class="input-container">
         <div>
             <label for="dose">Dose (g):</label>
-            <input type="number" id="dose" placeholder="Enter dose in grams">
+            <input type="number" id="dose" placeholder="Enter dose in grams" inputmode="numeric">
         </div>
         <div>
             <label for="ratio">Ratio:</label>
-            <input type="number" id="ratio" placeholder="Enter ratio (e.g., 15)">
+            <input type="number" id="ratio" placeholder="Enter ratio (e.g., 15)" inputmode="numeric">
         </div>
         <div>
             <label for="water-output">Water:</label>
@@ -40,6 +53,15 @@
     </table>
 
     <script>
+    document.getElementById("hamburger-icon").addEventListener("click", function() {
+    var menu = document.getElementById("menu");
+    menu.classList.toggle("active");
+});
+function toggleMenu() {
+    const menu = document.querySelector('.menu');
+    menu.classList.toggle('active');
+}
+
         function updateWaterOutput() {
             const dose = parseFloat(document.getElementById('dose').value);
             const ratio = parseFloat(document.getElementById('ratio').value);
