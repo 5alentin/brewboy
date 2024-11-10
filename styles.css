@@ -39,7 +39,7 @@ input[type="number"], #water-output {
 }
 
 input[type="number"]::placeholder {
-    color: #888; /* Placeholder text color */
+    color: #fff; /* Placeholder text color */
 }
 
 button {
@@ -200,23 +200,25 @@ td {
     }
 }
 
-@media (min-width: 601px) {
-    /* Keep inputs next to each other on larger screens */
+/* Additional changes for dynamic resizing of elements on orientation change */
+@media screen and (orientation: portrait) {
     .input-container {
-        justify-content: flex-start; /* Align inputs to the left */
-        width: auto;
+        justify-content: center;
     }
+}
 
-    .input-container div {
-        margin-right: 10px; /* Keep some space between inputs */
-        width: auto; /* Allow inputs to be inline */
+@media screen and (orientation: landscape) {
+    .input-container {
+        justify-content: flex-start;
     }
+}
 
-    input[type="number"], #water-output {
-        width: auto; /* Allow inputs to be their natural size */
-    }
-
-    button {
-        width: auto; /* Button width stays as natural size */
-    }
+select {
+    padding: 10px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background-color: #333;
+    color: #f0f0f0;
+    width: 100%;
+    max-width: 250px;
 }

@@ -3,51 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Under Construction</title>
+    <title>Mr. TDS</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon"> <!-- Link to the favicon -->
+    <link rel="icon" href="icon.png" type="image/png"> <!-- For standard browsers -->
+    <link rel="apple-touch-icon" href="icon.png"> <!-- For iOS home screen -->
     <style>
-        body {
-            background-color: #1e1e1e; /* Dark background */
-            color: #f0f0f0; /* Light text color */
-            font-family: 'Courier New', monospace; /* Default font */
-            margin: 0;
+        /* Style for the input container and result box */
+        .input-container {
+            background-color: #333; /* Dark grey background initially */
+            color: white; /* White text */
             padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+            gap: 20px;
+            transition: background-color 0.5s ease; /* Smooth transition for color change */
         }
 
-        h1 {
-            font-family: 'Courier New', monospace; /* Title font */
-            color: #ffffff; /* White color for title */
-            margin-bottom: 20px; /* Space below title */
+        /* Style for the result header */
+        #result-header {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
         }
 
-        p {
-            color: #f0f0f0;
-            margin-bottom: 30px;
+        /* Style for the result text */
+        #result {
+            font-size: 1.2rem;
+            font-weight: bold;
         }
 
-        button {
-            padding: 10px 15px; /* Padding for the button */
-            border: none; /* No border */
-            border-radius: 10px; /* Rounded corners */
-            background-color: #4f43ae; /* Button color */
-            color: #fff; /* Button text color */
-            cursor: pointer; /* Pointer cursor on hover */
-            transition: background-color 0.3s; /* Transition effect */
-            width: 200px; /* Set width of the button */
-        }
-
-        button:hover {
-            background-color: #b5b6e4; /* Darker button color on hover */
-        }
     </style>
 </head>
 <body>
-    <h1>Sorry for that! Check Back Later</h1>
-    <p>Thanks for being curious but we are still Under Construction</p>
-    <button onclick="window.location.reload(); history.back();">Go Back and Refresh</button>
+  <div class="hamburger-container">
+    <div class="hamburger" id="hamburger-icon">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+    </div>
+    <nav class="menu" id="menu">
+        <ul>
+            <li><a href="index.html">BrewBoy</a></li>
+            <li><a href="MR_TDS.html">MR.TDS</a></li>
+        </ul>
+    </nav>
+</div>
+
+    <h1>Mr.TDS v1</h1>
+    <div class="input-container">
+        <div>
+            <label for="tds">TDS (%):</label>
+            <input type="number" id="tds" placeholder="Enter TDS" step="any" inputmode="decimal">
+        </div>
+        <div>
+            <label for="dose">Dose (g):</label>
+            <input type="number" id="dose" placeholder="Enter Dose in grams" inputmode="decimal">
+        </div>
+        <div>
+            <label for="yield">Yield (g):</label>
+            <input type="number" id="yield" placeholder="Enter Yield in grams" step="any" inputmode="decimal">
+        </div>
+
+        <!-- Result section inside the same dark box -->
+        <h2 id="result-header">Extraction Yield</h2>
+        <p id="result"></p>
+    </div>
+
+    <script>
+        // Hamburger menu toggle functionality
+        document.getElementById("hamburger-icon").addEventListener("click", function() {
+            var menu = document.getElementById("menu");
+            menu.classList.toggle("active");
+        });
+
+        // Function to calculate the extraction yield
+        function calculateExtractionYield() {
+            const tds = parseFloat(document.getElementById('tds').value);
+            const yieldValue = parseFloat(document.getElementById('yield').value);
+            const dose = parseFloat(document.getElementById('dose').value);
+            const resultElement = document.getElementById('result');
+            const resultHeader = document.getElementById('result-header');
+            const inputContainer = document.querySelector('.input-container');
+
+            // Clear previous result
+            resultElement.textContent = '';
+
+            // Check for valid input
+            if (isNaN(tds) || isNaN(yieldValue) || isNaN(dose) || tds <= 0 || yieldValue <= 0 || dose <= 0) {
+                resultElement.textContent = ''; // Clear the result if inputs are invalid
+                return;
+            }
+
+            // Calculate the extraction yield using the formula
+            const extractionYield = (tds * yieldValue) / dose;
+
+            // Display the results in the same dark box
+            resultElement.textContent = `${extractionYield.toFixed(2)}%`;
+
+            // Update the background color based on the extraction yield and TDS
+            if (
+                (extractionYield >= 18 && extractionYield <= 21 && ((tds >= 8 && tds <= 12) || (tds >= 1.25 && tds <= 1.5)))
+            ) {
+                inputContainer.style.backgroundColor = '#28a745';  // Green
+            } else if (extractionYield > 21 || tds > 12 || (tds > 1.5 && tds <= 12)) {
+                inputContainer.style.backgroundColor = '#FFA500';  // Yellowish orange
+            } else {
+                inputContainer.style.backgroundColor = '#005f73';  // Blue
+            }
+        }
+
+        // Event listeners for input fields to trigger live calculation
+        document.getElementById('tds').addEventListener('input', calculateExtractionYield);
+        document.getElementById('dose').addEventListener('input', calculateExtractionYield);
+        document.getElementById('yield').addEventListener('input', calculateExtractionYield);
+    </script>
 </body>
 </html>
