@@ -29,6 +29,7 @@ h1 {
 }
 
 input[type="number"], #water-output {
+    font-size: 16px; /* Prevent zoom by ensuring font size is at least 16px */
     padding: 10px; /* Padding inside inputs */
     border: 1px solid #444; /* Dark border */
     border-radius: 4px; /* Rounded corners */
