@@ -223,3 +223,31 @@ select {
     width: 100%;
     max-width: 250px;
 }
+
+
+#custom-recipe-editor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1em 0;
+}
+
+#custom-recipe-input {
+  width: 80%;
+  max-width: 400px;
+  margin-bottom: 0.5em;
+  font-size: 1em;
+  padding: 0.4em;
+}
+
+#save-custom-recipe {
+    padding: 10px 15px; /* Padding for the button */
+    border: none; /* No border */
+    border-radius: 10px; /* Rounded corners */
+    background-color: #4f43ae; /* Button color */
+    color: #fff; /* Button text color */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Transition effect */
+    width: 50%; /* Make button take full width on mobile */
+    max-width: 250px; /* Limit the maximum width */
+}

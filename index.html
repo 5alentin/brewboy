@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BrewBoy v1.5</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Link to the CSS file -->
-    <link rel="icon" href="favicon.ico" type="image/x-icon"> <!-- Link to the favicon -->
-    <link rel="icon" href="icon.png" type="image/png"> <!-- For standard browsers -->
-    <link rel="apple-touch-icon" href="icon.png"> <!-- For iOS home screen -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>BrewBoy v1.7</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="icon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="icon.png" />
 </head>
 <body>
   <div class="hamburger-container">
@@ -22,142 +22,223 @@
             <li><a href="MR_TDS.html">MR.TDS</a></li>
         </ul>
     </nav>
+  </div>
+
+  <h1>BrewBoy v1.7</h1>
+  <div class="input-container">
+      <div>
+          <label for="dose">Dose (g):</label>
+          <input type="number" id="dose" placeholder="Enter dose in grams" inputmode="decimal" />
+      </div>
+      <div>
+          <label for="ratio">Ratio:</label>
+          <input type="number" id="ratio" placeholder="Enter ratio (e.g., 15)" inputmode="decimal" />
+      </div>
+      <div>
+          <label for="water-output">Water:</label>
+          <input type="text" id="water-output" readonly />
+      </div>
+  </div>
+
+  <div class="dropdown-container">
+      <div>
+          <label for="profile">Profile:</label>
+          <select id="profile" >
+              <option value="standard">Standard</option>
+              <option value="sweeter">Sweeter</option>
+              <option value="brighter">Brighter</option>
+          </select>
+          <p id="profile-description" class="description"></p>
+      </div>
+      <div>
+          <label for="strength">Strength:</label>
+          <select id="strength">
+              <option value="lighter">Lighter</option>
+              <option value="standard">Standard</option>
+              <option value="stronger">Stronger</option>
+          </select>
+      </div>
+  </div>
+
+  <button id="calculate">Calculate</button>
+
+  <h2 class="hidden" id="results-header">Calculated Pulses</h2>
+  <table id="result-table" class="hidden" border="1">
+      <thead>
+          <tr>
+              <th>Pulse</th>
+              <th>Amount (g)</th>
+              <th>%</th>
+              <th>Running Total</th>
+          </tr>
+      </thead>
+      <tbody>
+          <!-- Results will be filled in here -->
+      </tbody>
+  </table>
+
+  <div id="custom-recipe-editor">
+  <label for="custom-recipe-input">Custom Recipe Percentages (comma separated):</label>
+  <input type="text" id="custom-recipe-input" placeholder="e.g., 25,25,25,25" />
+  <button id="save-custom-recipe">Use Custom Recipe</button>
 </div>
-    <h1>BrewBoy v1.5</h1>
-    <div class="input-container">
-        <div>
-            <label for="dose">Dose (g):</label>
-            <input type="number" id="dose" placeholder="Enter dose in grams" inputmode="decimal">
-        </div>
-        <div>
-            <label for="ratio">Ratio:</label>
-            <input type="number" id="ratio" placeholder="Enter ratio (e.g., 15)" inputmode="decimal">
-        </div>
-        <div>
-            <label for="water-output">Water:</label>
-            <input type="text" id="water-output" readonly>
-        </div>
-    </div>
-    <div class="dropdown-container">
-        <div>
-            <label for="profile">Profile:</label>
-            <select id="profile">
-                <option value="standard">Standard</option>
-                <option value="sweeter">Sweeter</option>
-                <option value="brighter">Brighter</option>
-            </select>
-        </div>
-        <div>
-            <label for="strength">Strength:</label>
-            <select id="strength">
-                <option value="lighter">Lighter</option>
-                <option value="standard">Standard</option>
-                <option value="stronger">Stronger</option>
-            </select>
-        </div>
-    </div>
-    <button id="calculate">Calculate</button>
 
-    <h2 class="hidden" id="results-header">Calculated Pulses</h2>
-    <table id="result-table" class="hidden" border="1">
-        <thead>
-            <tr>
-                <th>Pulse</th>
-                <th>Amount</th>
-                <th>Running Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Results will be filled in here -->
-        </tbody>
-    </table>
+  <script>
+    document.getElementById("hamburger-icon").addEventListener("click", function () {
+      document.getElementById("menu").classList.toggle("active");
+    });
 
-    <script>
-        document.getElementById("hamburger-icon").addEventListener("click", function() {
-            var menu = document.getElementById("menu");
-            menu.classList.toggle("active");
-        });
+    function updateWaterOutput() {
+      const dose = parseFloat(document.getElementById("dose").value);
+      const ratio = parseFloat(document.getElementById("ratio").value);
+      const waterOutput = document.getElementById("water-output");
+      if (!isNaN(dose) && !isNaN(ratio) && dose > 0 && ratio > 0) {
+        const totalWater = Math.round(dose * ratio);
+        waterOutput.value = totalWater + "g";
+      } else {
+        waterOutput.value = "";
+      }
+    }
 
-        function updateWaterOutput() {
-            const dose = parseFloat(document.getElementById('dose').value);
-            const ratio = parseFloat(document.getElementById('ratio').value);
-            const waterOutput = document.getElementById('water-output');
+    document.getElementById("dose").addEventListener("input", updateWaterOutput);
+    document.getElementById("ratio").addEventListener("input", updateWaterOutput);
 
-            if (!isNaN(dose) && !isNaN(ratio) && dose > 0 && ratio > 0) {
-                const totalWater = Math.round(dose * ratio);
-                waterOutput.value = totalWater + 'g';
-            } else {
-                waterOutput.value = '';
-            }
+    const profileDescriptions = {
+      standard: "",
+      sweeter: "",
+      brighter: "",
+      custom: "",
+    };
+
+    function updateProfileDescription() {
+      const profile = document.getElementById("profile").value;
+      if (profile === "custom") {
+        document.getElementById("profile-description").textContent =
+          profileDescriptions.custom;
+      } else {
+        document.getElementById("profile-description").textContent =
+          profileDescriptions[profile] || "";
+      }
+    }
+
+    document.getElementById("profile").addEventListener("change", updateProfileDescription);
+
+    // Manage custom recipe as full pulse breakdown, replacing profile + strength
+    let customRecipe = [];
+
+    document.getElementById("save-custom-recipe").addEventListener("click", function () {
+      const input = document.getElementById("custom-recipe-input").value;
+      try {
+        customRecipe = input
+          .split(",")
+          .map((p) => parseFloat(p.trim()))
+          .filter((n) => !isNaN(n));
+        const sum = customRecipe.reduce((a, b) => a + b, 0);
+        if (Math.abs(sum - 100) > 0.01) { // allow tiny float imprecision
+          alert("Custom recipe percentages must sum to 100.");
+          customRecipe = [];
+          return;
         }
+        if (!document.querySelector('#profile option[value="custom"]')) {
+          const option = document.createElement("option");
+          option.value = "custom";
+          option.text = "Custom";
+          document.getElementById("profile").appendChild(option);
+        }
+        document.getElementById("profile").value = "custom";
+        document.getElementById("strength").disabled = true;
+        updateProfileDescription();
 
-        document.getElementById('dose').addEventListener('input', updateWaterOutput);
-        document.getElementById('ratio').addEventListener('input', updateWaterOutput);
+        // Immediately run calculation with custom recipe
+        document.getElementById("calculate").click();
+      } catch {
+        alert("Invalid input for custom recipe.");
+        customRecipe = [];
+      }
+    });
 
-        document.getElementById('calculate').addEventListener('click', function() {
-            const dose = parseFloat(document.getElementById('dose').value);
-            const ratio = parseFloat(document.getElementById('ratio').value);
-            const profile = document.getElementById('profile').value;
-            const strength = document.getElementById('strength').value;
-            const tableBody = document.getElementById('result-table').getElementsByTagName('tbody')[0];
-            const resultsHeader = document.getElementById('results-header');
 
-            tableBody.innerHTML = '';
+    // When user switches away from custom profile, enable strength dropdown
+    document.getElementById("profile").addEventListener("change", function () {
+      if (this.value !== "custom") {
+        document.getElementById("strength").disabled = false;
+        updateProfileDescription();
+      }
+    });
 
-            if (isNaN(dose) || isNaN(ratio) || dose <= 0 || ratio <= 0) {
-                alert('Please enter valid positive numbers for dose and ratio.');
-                return;
-            }
+    document.getElementById("calculate").addEventListener("click", function () {
+      const dose = parseFloat(document.getElementById("dose").value);
+      const ratio = parseFloat(document.getElementById("ratio").value);
+      const profile = document.getElementById("profile").value;
+      const strength = document.getElementById("strength").value;
+      const tableBody = document
+        .getElementById("result-table")
+        .getElementsByTagName("tbody")[0];
+      const resultsHeader = document.getElementById("results-header");
 
-            resultsHeader.classList.remove('hidden');
-            document.getElementById('result-table').classList.remove('hidden');
+      tableBody.innerHTML = "";
 
-            const totalWater = Math.round(dose * ratio);
+      if (isNaN(dose) || isNaN(ratio) || dose <= 0 || ratio <= 0) {
+        alert("Please enter valid positive numbers for dose and ratio.");
+        return;
+      }
 
-            const profileData = {
-                standard: [20, 20],
-                sweeter: [16.67, 23.33],
-                brighter: [23.33, 16.67]
-            };
+      resultsHeader.classList.remove("hidden");
+      document.getElementById("result-table").classList.remove("hidden");
 
-            const strengthData = {
-                lighter: [60],
-                standard: [30, 30],
-                stronger: [20, 20, 20]
-            };
+      const totalWater = Math.round(dose * ratio);
 
-            const selectedProfile = profileData[profile];
-            const selectedStrength = strengthData[strength];
+      const profileData = {
+        standard: [20, 20],
+        sweeter: [16.67, 23.33],
+        brighter: [23.33, 16.67],
+      };
 
-            let runningTotal = 0;
-            let pulseCount = 1;
+      const strengthData = {
+        lighter: [60],
+        standard: [30, 30],
+        stronger: [20, 20, 20],
+      };
 
-            selectedProfile.forEach(percentage => {
-                const pulseAmount = Math.round(totalWater * (percentage / 100));
-                runningTotal += pulseAmount;
+      let percentages = [];
 
-                const tr = tableBody.insertRow();
-                tr.insertCell().innerText = `Pulse ${pulseCount}`;
-                tr.insertCell().innerText = `${pulseAmount}g`;
-                tr.insertCell().innerText = `${runningTotal}g`;
-                pulseCount++;
-            });
+      if (profile === "custom") {
+        // Use full custom recipe (already validated)
+        percentages = customRecipe;
+      } else {
+        // Combine profile + strength percentages as the recipe
+        const prof = profileData[profile] || [];
+        const stren = strengthData[strength] || [];
+        percentages = [...prof, ...stren];
+      }
 
-            selectedStrength.forEach(percentage => {
-                const pulseAmount = Math.round(totalWater * (percentage / 100));
-                runningTotal += pulseAmount;
+      // Calculate pulse amounts rounding and adjust last pulse to fix rounding error
+      let runningTotal = 0;
+      let pulseCount = 1;
+      let pulseAmounts = percentages.map(
+        (p) => Math.round(totalWater * (p / 100))
+      );
+      const sumPulses = pulseAmounts.reduce((a, b) => a + b, 0);
+      const roundingError = totalWater - sumPulses;
+      pulseAmounts[pulseAmounts.length - 1] += roundingError;
 
-                const tr = tableBody.insertRow();
-                tr.insertCell().innerText = `Pulse ${pulseCount}`;
-                tr.insertCell().innerText = `${pulseAmount}g`;
-                tr.insertCell().innerText = `${runningTotal}g`;
-                pulseCount++;
-            });
+      pulseAmounts.forEach((amount, i) => {
+        runningTotal += amount;
+        const tr = tableBody.insertRow();
+        tr.insertCell().innerText = `Pulse ${pulseCount}`;
+        tr.insertCell().innerText = `${amount}g`;
+        tr.insertCell().innerText = `${percentages[i].toFixed(2)}%`;
+        tr.insertCell().innerText = `${runningTotal}g`;
+        pulseCount++;
+      });
 
-            // Auto-scroll to the bottom of the table
-            const resultTable = document.getElementById('result-table');
-            resultTable.scrollIntoView({ behavior: 'smooth', block: 'end' });
-        });
-    </script>
+      document
+        .getElementById("result-table")
+        .scrollIntoView({ behavior: "smooth", block: "end" });
+    });
+
+    // Initialize description
+    updateProfileDescription();
+  </script>
 </body>
 </html>
