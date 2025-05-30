@@ -139,35 +139,52 @@
     let customRecipe = [];
 
     document.getElementById("save-custom-recipe").addEventListener("click", function () {
-      const input = document.getElementById("custom-recipe-input").value;
-      try {
-        customRecipe = input
-          .split(",")
-          .map((p) => parseFloat(p.trim()))
-          .filter((n) => !isNaN(n));
-        const sum = customRecipe.reduce((a, b) => a + b, 0);
-        if (Math.abs(sum - 100) > 0.01) { // allow tiny float imprecision
-          alert("Custom recipe percentages must sum to 100.");
-          customRecipe = [];
-          return;
-        }
-        if (!document.querySelector('#profile option[value="custom"]')) {
-          const option = document.createElement("option");
-          option.value = "custom";
-          option.text = "Custom";
-          document.getElementById("profile").appendChild(option);
-        }
-        document.getElementById("profile").value = "custom";
-        document.getElementById("strength").disabled = true;
-        updateProfileDescription();
+      const raw = document.getElementById("custom-recipe-input").value.trim().toUpperCase();
 
-        // Immediately run calculation with custom recipe
-        document.getElementById("calculate").click();
-      } catch {
-        alert("Invalid input for custom recipe.");
-        customRecipe = [];
+      // Extract dose and ratio
+      const doseMatch = raw.match(/D(\d+(\.\d+)?)/);
+      const ratioMatch = raw.match(/R(\d+(\.\d+)?)/);
+      if (doseMatch) document.getElementById("dose").value = parseFloat(doseMatch[1]);
+      if (ratioMatch) document.getElementById("ratio").value = parseFloat(ratioMatch[1]);
+
+      // Remove D and R for percentage parsing
+      const cleaned = raw.replace(/D\d+(\.\d+)?/g, '')
+                         .replace(/R\d+(\.\d+)?/g, '')
+                         .replace(/\s+/g, '');
+
+      let percentages = [];
+
+      if (cleaned.includes(',')) {
+        // Comma-separated list
+        percentages = cleaned.split(',').map(s => parseFloat(s.trim()));
+      } else {
+        // Compact format: try to chunk into 2-digit groups
+        const digitChunks = cleaned.match(/.{1,2}/g) || [];
+        percentages = digitChunks.map(s => parseFloat(s));
       }
+
+      const valid = percentages.length > 0 && percentages.every(p => !isNaN(p));
+      const sum = percentages.reduce((a, b) => a + b, 0);
+
+      if (!valid || Math.abs(sum - 100) > 0.01) {
+        alert("Custom recipe percentages must sum to 100.");
+        return;
+      }
+
+      customRecipe = percentages;
+
+      if (!document.querySelector('#profile option[value="custom"]')) {
+        const option = document.createElement("option");
+        option.value = "custom";
+        option.text = "Custom";
+        document.getElementById("profile").appendChild(option);
+      }
+      document.getElementById("profile").value = "custom";
+      document.getElementById("strength").disabled = true;
+      updateProfileDescription();
+      document.getElementById("calculate").click();
     });
+
 
 
     // When user switches away from custom profile, enable strength dropdown
