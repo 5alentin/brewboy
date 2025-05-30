@@ -388,7 +388,63 @@
 
     // Initialize with English
     applyTranslations("en");
+//adding copying
+function showToast(message) {
+  const toast = document.getElementById("copy-toast");
+  toast.textContent = message;
+  toast.style.opacity = "1";
+  setTimeout(() => {
+    toast.style.opacity = "0";
+  }, 2000);
+}
+
+function formatRecipeString() {
+  const dose = document.getElementById("dose").value;
+  const ratio = document.getElementById("ratio").value;
+  const formatted = customRecipe.map(p => Math.round(p)).join('') + `d${dose}r${ratio}`;
+  return formatted;
+}
+
+function handleCopyRecipe() {
+  if (customRecipe.length === 0) return;
+  const recipeString = formatRecipeString();
+  navigator.clipboard.writeText(recipeString)
+    .then(() => showToast("Recipe copied to clipboard!"))
+    .catch(() => showToast("Failed to copy recipe."));
+}
+
+// Triple tap detection
+let tapTimes = [];
+
+window.addEventListener('touchend', function () {
+  const now = Date.now();
+  tapTimes = tapTimes.filter(t => now - t < 600); // keep recent taps <600ms old
+  tapTimes.push(now);
+  if (tapTimes.length === 3) {
+    tapTimes = []; // reset
+    handleCopyRecipe();
+  }
+});
 
   </script>
+
+  <div id="copy-toast" style="
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+    pointer-events: none;
+  ">
+    Recipe copied to clipboard!
+  </div>
+
 </body>
 </html>
