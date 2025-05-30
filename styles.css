@@ -254,12 +254,15 @@ select {
 
 
   .lang-selector-container {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    z-index: 1000;
-    font-family: monospace;
-  }
+  display: block !important;
+  position: fixed !important;
+  top: 10px !important;
+  right: 10px !important;
+  z-index: 9999 !important;
+  background: red !important; /* temporary visible background */
+  width: 100px !important;
+  height: 40px !important;
+}
 
   .lang-button {
     background: #222;
