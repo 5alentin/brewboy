@@ -24,38 +24,50 @@
     </nav>
   </div>
 
-  <h1>BrewBoy v1.7</h1>
+  <!-- Language selector button on top right -->
+<div class="lang-selector-container">
+  <div class="lang-button" id="lang-button">🌐 ▼</div>
+  <div class="lang-dropdown" id="lang-dropdown">
+    <a href="#" data-lang="en">en</a>
+    <a href="#" data-lang="es">🇵🇷</a>
+    <a href="#" data-lang="ja">🇯🇵</a>
+  </div>
+</div>
+
+
+  <h1 id="title">BrewBoy v1.7</h1>
+
   <div class="input-container">
       <div>
-          <label for="dose">Dose (g):</label>
+          <label for="dose" id="label-dose">Dose (g):</label>
           <input type="number" id="dose" placeholder="Enter dose in grams" inputmode="decimal" />
       </div>
       <div>
-          <label for="ratio">Ratio:</label>
+          <label for="ratio" id="label-ratio">Ratio:</label>
           <input type="number" id="ratio" placeholder="Enter ratio (e.g., 15)" inputmode="decimal" />
       </div>
       <div>
-          <label for="water-output">Water:</label>
+          <label for="water-output" id="label-water">Water:</label>
           <input type="text" id="water-output" readonly />
       </div>
   </div>
 
   <div class="dropdown-container">
       <div>
-          <label for="profile">Profile:</label>
+          <label for="profile" id="label-profile">Profile:</label>
           <select id="profile" >
-              <option value="standard">Standard</option>
-              <option value="sweeter">Sweeter</option>
-              <option value="brighter">Brighter</option>
+              <option id="option-standard" value="standard">Standard</option>
+              <option id="option-sweeter" value="sweeter">Sweeter</option>
+              <option id="option-brighter" value="brighter">Brighter</option>
           </select>
           <p id="profile-description" class="description"></p>
       </div>
       <div>
-          <label for="strength">Strength:</label>
+          <label for="strength" id="label-strength">Strength:</label>
           <select id="strength">
-              <option value="lighter">Lighter</option>
-              <option value="standard">Standard</option>
-              <option value="stronger">Stronger</option>
+              <option id="option-lighter" value="lighter">Lighter</option>
+              <option id="option-standard" value="standard">Standard</option>
+              <option id="option-stronger" value="stronger">Stronger</option>
           </select>
       </div>
   </div>
@@ -66,10 +78,10 @@
   <table id="result-table" class="hidden" border="1">
       <thead>
           <tr>
-              <th>Pulse</th>
-              <th>Amount (g)</th>
-              <th>%</th>
-              <th>Running Total</th>
+            <th id="th-pulse">Pulse</th>
+            <th id="th-amount">Amount (g)</th>
+            <th id="th-percent">%</th>
+            <th id="th-total">Running Total</th>
           </tr>
       </thead>
       <tbody>
@@ -78,7 +90,7 @@
   </table>
 
   <div id="custom-recipe-editor">
-  <label for="custom-recipe-input">Custom Recipe Percentages (comma separated):</label>
+  <label for="custom-recipe-input" id="label-custom">Custom Recipe Percentages (comma separated):</label>
   <input type="text" id="custom-recipe-input" placeholder="e.g., 25,25,25,25" />
   <button id="save-custom-recipe">Use Custom Recipe</button>
 </div>
@@ -227,7 +239,7 @@
         const tr = tableBody.insertRow();
         tr.insertCell().innerText = `Pulse ${pulseCount}`;
         tr.insertCell().innerText = `${amount}g`;
-        tr.insertCell().innerText = `${percentages[i].toFixed(2)}%`;
+        tr.insertCell().innerText = `${percentages[i].toFixed(0)}%`;
         tr.insertCell().innerText = `${runningTotal}g`;
         pulseCount++;
       });
@@ -239,6 +251,127 @@
 
     // Initialize description
     updateProfileDescription();
+    // Language translation logic
+    const translations = {
+      en: {
+        title: "BrewBoy v1.7",
+        labelDose: "Dose (g):",
+        labelRatio: "Ratio:",
+        labelWater: "Water:",
+        labelProfile: "Profile:",
+        labelStrength: "Strength:",
+        labelCustom: "Custom Recipe Percentages (comma separated):",
+        buttonCalculate: "Calculate",
+        buttonCustom: "Use Custom Recipe",
+        resultsHeader: "Calculated Pulses",
+        pulse: "Pulse",
+        amount: "Amount (g)",
+        percent: "%",
+        total: "Running Total",
+        placeholders: {
+          dose: "Enter dose in grams",
+          ratio: "Enter ratio (e.g., 15)",
+          custom: "e.g., 25,25,25,25"
+        }
+      },
+      es: {
+        title: "BrewBoy v1.7",
+        labelDose: "Dosis (g):",
+        labelRatio: "Relación:",
+        labelWater: "Agua:",
+        labelProfile: "Perfil:",
+        labelStrength: "Fuerza:",
+        labelCustom: "Porcentajes de receta personalizada (separados por comas):",
+        buttonCalculate: "Calcular",
+        buttonCustom: "Usar receta personalizada",
+        resultsHeader: "Pulsos calculados",
+        pulse: "Pulso",
+        amount: "Cantidad (g)",
+        percent: "%",
+        total: "Total acumulado",
+        placeholders: {
+          dose: "Ingrese dosis en gramos",
+          ratio: "Ingrese relación (ej. 15)",
+          custom: "ej. 25,25,25,25"
+        }
+      },
+      ja: {
+        title: "BrewBoy v1.7",
+        labelDose: "分量 (g):",
+        labelRatio: "比率:",
+        labelWater: "水量:",
+        labelProfile: "プロファイル:",
+        labelStrength: "強さ:",
+        labelCustom: "カスタムレシピの割合 (カンマ区切り):",
+        buttonCalculate: "計算する",
+        buttonCustom: "カスタムレシピを使う",
+        resultsHeader: "計算されたパルス",
+        pulse: "パルス",
+        amount: "量 (g)",
+        percent: "%",
+        total: "累積合計",
+        placeholders: {
+          dose: "分量をグラムで入力",
+          ratio: "比率を入力 (例: 15)",
+          custom: "例: 25,25,25,25"
+        }
+      }
+    };
+
+    function applyTranslations(lang) {
+      const t = translations[lang];
+      if (!t) return;
+      document.getElementById("title").textContent = t.title;
+      document.getElementById("label-dose").textContent = t.labelDose;
+      document.getElementById("label-ratio").textContent = t.labelRatio;
+      document.getElementById("label-water").textContent = t.labelWater;
+      document.getElementById("label-profile").textContent = t.labelProfile;
+      document.getElementById("label-strength").textContent = t.labelStrength;
+      document.getElementById("label-custom").textContent = t.labelCustom;
+      document.getElementById("calculate").textContent = t.buttonCalculate;
+      document.getElementById("save-custom-recipe").textContent = t.buttonCustom;
+      document.getElementById("results-header").textContent = t.resultsHeader;
+      document.getElementById("th-pulse").textContent = t.pulse;
+      document.getElementById("th-amount").textContent = t.amount;
+      document.getElementById("th-percent").textContent = t.percent;
+      document.getElementById("th-total").textContent = t.total;
+      document.getElementById("dose").placeholder = t.placeholders.dose;
+      document.getElementById("ratio").placeholder = t.placeholders.ratio;
+      document.getElementById("custom-recipe-input").placeholder = t.placeholders.custom;
+
+      const langNames = { en: "en", es: "🇯🇵", ja: "🇯🇵" };
+      document.getElementById("lang-button").textContent = "🌐";
+    }
+
+    // Language dropdown toggle
+    const langButton = document.getElementById("lang-button");
+    const langDropdown = document.getElementById("lang-dropdown");
+
+    langButton.addEventListener("click", () => {
+      langDropdown.classList.toggle("active");
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!langButton.contains(e.target) && !langDropdown.contains(e.target)) {
+        langDropdown.classList.remove("active");
+      }
+    });
+
+    // Handle language selection
+    document.querySelectorAll('#lang-dropdown a').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const lang = e.target.getAttribute('data-lang');
+        applyTranslations(lang);
+        langDropdown.classList.remove("active");
+        document.getElementById("menu").classList.remove("active");
+      });
+    });
+
+    // Initialize with English
+    applyTranslations("en");
+
   </script>
 </body>
 </html>
