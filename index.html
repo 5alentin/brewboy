@@ -428,12 +428,26 @@ window.addEventListener('touchend', function () {
 
 window.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
+  const custom = params.get('custom');
+
+  if (custom) {
+    const input = document.getElementById('custom-recipe-input');
+    input.value = custom;
+
+    setTimeout(() => {
+      document.getElementById('save-custom-recipe').click();
+    }, 100);
+
+    return; // skip dose/ratio if custom is used
+  }
+
   const dose = params.get('dose');
   const ratio = params.get('ratio');
 
-  if (dose) document.getElementById('dose').value = dose;
+  if (dose)  document.getElementById('dose').value = dose;
   if (ratio) document.getElementById('ratio').value = ratio;
 });
+
 
 
   </script>
