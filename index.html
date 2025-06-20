@@ -9,6 +9,7 @@
     <link rel="icon" href="icon.png" type="image/png" />
     <link rel="apple-touch-icon" href="icon.png" />
 </head>
+
 <body>
   <div class="hamburger-container">
     <div class="hamburger" id="hamburger-icon">
@@ -24,6 +25,9 @@
     </nav>
   </div>
 
+  <div id="recipe-flash" style="display: none; padding: 10px; background: yellow; color: black; font-weight: bold; text-align: center; border: 2px solid black;">
+    Recipe name placeholder
+  </div>
   <!-- Language selector button on top right -->
 <div class="lang-selector-container">
   <div class="lang-button" id="lang-button">🌐 ▼</div>
@@ -435,12 +439,30 @@ window.addEventListener('DOMContentLoaded', () => {
     input.value = custom;
 
     setTimeout(() => {
-      document.getElementById('save-custom-recipe').click();
-    }, 100);
+      document.getElementById('save-custom-recipe')?.click();
 
-    return; // skip dose/ratio if custom is used
+      // Optional: show recipe name as a toast
+      const recipeMap = {
+        '25252525d15r16': 'Sweet Bloom Style',
+        '30201040d18r15': 'Kalita Precision',
+        '20052025d16r14': 'Nordic High Clarity'
+      };
+      const recipeName = recipeMap[custom];
+      if (recipeName) {
+        showToast(`Recipe: ${recipeName}`);
+      }
+
+      // Scroll to bottom after recipe is applied and toast is shown
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      }, 100); // slight delay to ensure DOM updates first
+
+    }, 100); // delay to ensure button click works
+
+    return;
   }
 
+  // fallback to dose + ratio
   const dose = params.get('dose');
   const ratio = params.get('ratio');
 
