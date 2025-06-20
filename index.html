@@ -26,7 +26,7 @@
   </div>
 
   <div id="recipe-flash" style="display: none; padding: 10px; background: yellow; color: black; font-weight: bold; text-align: center; border: 2px solid black;">
-    Recipe name placeholder
+    <!---Recipe name placeholder-->
   </div>
   <!-- Language selector button on top right -->
 <div class="lang-selector-container">
@@ -450,6 +450,7 @@ window.addEventListener('DOMContentLoaded', () => {
         '22221937d17r15.9': '2024 Martin Wölfl' ,
         '20202040d15r16.67': 'Brewed by Jay'
       };
+
       const recipeName = recipeMap[custom];
       if (recipeName) {
         showToast(`Recipe: ${recipeName}`);
