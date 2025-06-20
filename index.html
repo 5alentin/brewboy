@@ -426,6 +426,16 @@ window.addEventListener('touchend', function () {
   }
 });
 
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const dose = params.get('dose');
+  const ratio = params.get('ratio');
+
+  if (dose) document.getElementById('dose').value = dose;
+  if (ratio) document.getElementById('ratio').value = ratio;
+});
+
+
   </script>
 
   <div id="copy-toast" style="
