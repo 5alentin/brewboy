@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SCA Cupping Timer</title>
+  <style>
+    :root{--bg:#0f1724;--card:#2a2a2a;--muted:#9aa4b2;--accent:#60a5fa;--glass: rgba(255,255,255,0.03)}
+    *{box-sizing:border-box}
+    body{font-family: 'Courier New', monospace;;margin:0;background:linear-gradient(180deg, #2a2a2a 0%, #1f1f1f 100%);color:#f0f0f0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .app{width:980px;max-width:100%;display:grid;grid-template-columns:1fr 380px;gap:20px}
+    header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between}
+    h1{margin:0;font-size:20px}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+    .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 24px rgba(2,6,23,0.6);}
+    .timer-display{display:flex;align-items:center;gap:12px}
+    .big-time{font-size:48px;font-weight:700;letter-spacing:0.5px}
+    .sub{color:var(--muted);font-size:13px}
+    .controls{display:flex;gap:8px;margin-top:12px}
+    button{background:var(--glass);border:1px solid rgba(255,255,255,0.03);padding:10px 14px;border-radius:10px;color:inherit;cursor:pointer}
+    button.primary{background:linear-gradient(90deg, #8b5cf6, #a78bfa);border:none}
+    .preset-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+    .preset{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02)}
+    .preset .name{font-weight:600}
+    label.small{font-size:12px;color:var(--muted)}
+    input[type=number], input[type=text], select{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    .sidebar{display:flex;flex-direction:column;gap:12px}
+    .stages{display:flex;flex-direction:column;gap:8px}
+    .stage-row{display:flex;gap:8px;align-items:center}
+    .stage-row input[type=text]{width:40%}
+    .stage-row input[type=number]{width:30%}
+    .stage-row .move{cursor:grab}
+    .log{max-height:360px;overflow:auto;padding:8px;background:rgba(255,255,255,0.02);border-radius:8px;font-size:13px}
+    .log-entry{padding:8px;border-bottom:1px dashed rgba(255,255,255,0.02)}
+    .footer{text-align: center; grid-column:1/-1;margin-top:8px;color:var(--muted);font-size:12px}
+    .small-btn{padding:6px 8px;font-size:13px}
+    .flex{display:flex;gap:8px;align-items:center}
+    @media (max-width:880px){.app{grid-template-columns:1fr;}.sidebar{order:2}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>SCA Cupping Timer</h1>
+        <p class="lead">Preset cupping stages</p>
+      </div>
+      <div class="flex">
+        <button id="exportCsv" class="small-btn">Export CSV</button>
+        <button id="clearLog" class="small-btn">Clear Log</button>
+      </div>
+    </header>
+
+    <main class="card">
+      <div class="timer-display">
+        <div>
+          <div class="big-time" id="timeLarge">00:00</div>
+          <div class="sub" id="stageLabel">Not started</div>
+        </div>
+        <div style="margin-left:auto;text-align:right;">
+          <div class="sub">Elapsed: <span id="elapsed">00:00</span></div>
+          <div class="sub">Remaining: <span id="remaining">--:--</span></div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="startBtn" class="primary">Start</button>
+        <button id="pauseBtn">Pause</button>
+        <button id="skipBtn">Skip Stage</button>
+        <button id="resetBtn">Reset</button>
+      </div>
+
+      <div style="margin-top:12px">
+        <label class="small">Manual timer control</label>
+        <div style="display:grid;grid-template-columns:1fr 80px;gap:8px;margin-top:8px">
+          <input type="number" id="manualMin" min="0" placeholder="minutes">
+          <button id="setManual">Set</button>
+        </div>
+      </div>
+
+      <section style="margin-top:16px">
+        <label class="small">Stage presets</label>
+        <div class="preset-list" id="presetList"></div>
+      </section>
+    </main>
+
+    <aside class="sidebar">
+      <div class="card">
+        <label class="small">Stages (name + seconds)</label>
+        <div class="stages" id="stages"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input type="text" id="newName" placeholder="e.g. Pour">
+          <input type="number" id="newSeconds" placeholder="sec" min="1">
+          <button id="addStage">Add</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="savePreset">Save Preset</button>
+          <select id="presetSelect"></select>
+          <button id="loadPreset">Load</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <label class="small">Activity log</label>
+        <div class="log" id="log"></div>
+      </div>
+    </aside>
+
+    <div class="footer">¯\_(ツ)_/¯</div>
+  </div>
+
+  <audio id="pingSound">
+    <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=" type="audio/wav">
+  </audio>
+
+  <script>
+    // Simple single-file stage timer logic
+    const defaultStages = [
+      {name: 'Steep (crust)', seconds: 240},
+      {name: 'Break crust', seconds: 10},
+      {name: 'Skim & cool', seconds: 180},
+      {name: 'First slurp window', seconds: 300}
+    ];
+
+    let stages = JSON.parse(localStorage.getItem('scastages')) || defaultStages.slice();
+    let presets = JSON.parse(localStorage.getItem('scapresets')) || {};
+    let currentIndex = -1;
+    let running = false;
+    let startTs = null;
+    let stageStartTs = null;
+    let pausedAt = null;
+    let tickInterval = null;
+    let logEntries = JSON.parse(localStorage.getItem('scalog')) || [];
+
+    // DOM refs
+    const timeLarge = document.getElementById('timeLarge');
+    const stageLabel = document.getElementById('stageLabel');
+    const elapsedEl = document.getElementById('elapsed');
+    const remainingEl = document.getElementById('remaining');
+    const presetList = document.getElementById('presetList');
+    const stagesEl = document.getElementById('stages');
+    const logEl = document.getElementById('log');
+    const presetSelect = document.getElementById('presetSelect');
+
+    function formatTime(s){
+      if (s==null || isNaN(s)) return '--:--';
+      s = Math.max(0, Math.round(s));
+      const m = Math.floor(s/60).toString().padStart(2,'0');
+      const sec = (s%60).toString().padStart(2,'0');
+      return m+':'+sec;
+    }
+
+    function renderStages(){
+      stagesEl.innerHTML='';
+      stages.forEach((st, i)=>{
+        const row = document.createElement('div'); row.className='stage-row';
+        row.innerHTML = `
+          <input type="text" data-i="${i}" value="${st.name}">
+          <input type="number" data-i2="${i}" value="${st.seconds}" min="1">
+          <div style="margin-left:auto;display:flex;gap:6px">
+            <button class="small-btn" data-move="up" data-i="${i}">▲</button>
+            <button class="small-btn" data-move="down" data-i="${i}">▼</button>
+            <button class="small-btn" data-del="${i}">✖</button>
+          </div>`;
+        stagesEl.appendChild(row);
+      });
+    }
+
+    function renderPresetList(){
+      presetList.innerHTML='';
+      Object.keys(presets).forEach(name=>{
+        const el = document.createElement('div'); el.className='preset';
+        el.innerHTML = `<div><div class="name">${name}</div><div class="sub">${presets[name].length} stages</div></div>
+                        <div style="display:flex;gap:6px"><button data-load="${name}">Load</button><button data-delete="${name}">Del</button></div>`;
+        presetList.appendChild(el);
+      });
+
+      // populate select
+      presetSelect.innerHTML='';
+      const opt = document.createElement('option'); opt.value=''; opt.textContent='— choose —'; presetSelect.appendChild(opt);
+      Object.keys(presets).forEach(p=>{ const o = document.createElement('option'); o.value=p; o.textContent=p; presetSelect.appendChild(o); });
+    }
+
+    function renderLog(){
+      logEl.innerHTML='';
+      logEntries.slice().reverse().forEach(e=>{
+        const div = document.createElement('div'); div.className='log-entry';
+        div.innerHTML = `<strong>${e.when}</strong> — <span style="color:var(--muted)">${e.stage}</span> — ${e.note || ''}`;
+        logEl.appendChild(div);
+      });
+    }
+
+    function persist(){
+      localStorage.setItem('scastages', JSON.stringify(stages));
+      localStorage.setItem('scapresets', JSON.stringify(presets));
+      localStorage.setItem('scalog', JSON.stringify(logEntries));
+    }
+
+    function startTimer(){
+      if (running) return;
+      if (currentIndex === -1) currentIndex = 0;
+      running = true;
+      if (!startTs) startTs = Date.now();
+      if (!stageStartTs) stageStartTs = Date.now();
+      if (pausedAt){ // resume
+        const pausedDur = Date.now() - pausedAt;
+        startTs += pausedDur; stageStartTs += pausedDur; pausedAt = null;
+      }
+      tickInterval = setInterval(tick, 200);
+      log(`Started`, stages[currentIndex]?.name || '—');
+      updateUI();
+    }
+
+    function pauseTimer(){
+      if (!running) return;
+      running = false;
+      clearInterval(tickInterval); tickInterval = null;
+      pausedAt = Date.now();
+      log('Paused', stages[currentIndex]?.name || '—');
+      updateUI();
+    }
+
+    function resetTimer(){
+      clearInterval(tickInterval); tickInterval = null; running=false; startTs=null; stageStartTs=null; pausedAt=null; currentIndex=-1;
+      updateUI();
+      log('Reset', '—');
+    }
+
+    function skipStage(){
+      if (currentIndex < stages.length-1) {
+        currentIndex++;
+        stageStartTs = Date.now();
+        ping();
+        log('Skippd to', stages[currentIndex].name);
+      } else {
+        log('Finished', 'All stages');
+        resetTimer();
+      }
+      updateUI();
+    }
+
+    function tick(){
+      if (currentIndex<0 || currentIndex>=stages.length) return;
+      const now = Date.now();
+      const elapsedTotal = Math.floor((now - startTs)/1000);
+      const elapsedStage = Math.floor((now - stageStartTs)/1000);
+      const remainingStage = stages[currentIndex].seconds - elapsedStage;
+      // auto advance
+      if (remainingStage <= 0){
+        ping();
+        log('Stage end', stages[currentIndex].name);
+        if (currentIndex < stages.length-1){ currentIndex++; stageStartTs = Date.now(); }
+        else { log('All stages complete', '—'); resetTimer(); }
+      }
+      // UI
+      timeLarge.textContent = formatTime(Math.max(0, remainingStage));
+      stageLabel.textContent = `${stages[currentIndex].name} (${currentIndex+1}/${stages.length})`;
+      elapsedEl.textContent = formatTime(elapsedTotal);
+      remainingEl.textContent = formatTime(Math.max(0, remainingStage));
+    }
+
+    function updateUI(){
+      // basic
+      if (currentIndex === -1) {
+        timeLarge.textContent='00:00'; stageLabel.textContent='Not started'; remainingEl.textContent='--:--'; elapsedEl.textContent='00:00';
+      } else if (!running){
+        // show stage remaining based on pausedAt
+        const now = pausedAt || Date.now();
+        const elapsedTotal = Math.floor((now - (startTs||now))/1000);
+        const elapsedStage = Math.floor((now - (stageStartTs||now))/1000);
+        const remainingStage = stages[currentIndex].seconds - elapsedStage;
+        timeLarge.textContent = formatTime(Math.max(0, remainingStage));
+        stageLabel.textContent = `${stages[currentIndex].name} (${currentIndex+1}/${stages.length})`;
+        elapsedEl.textContent = formatTime(elapsedTotal);
+        remainingEl.textContent = formatTime(Math.max(0, remainingStage));
+      }
+    }
+
+    function ping(){
+      try{ document.getElementById('pingSound').play().catch(()=>{}); }catch(e){}
+    }
+
+    function log(action, stage, note){
+      const when = new Date().toLocaleString();
+      logEntries.push({when, action, stage, note});
+      persist(); renderLog();
+    }
+
+    // UI events
+    document.getElementById('startBtn').addEventListener('click', ()=>{
+      if (!running) startTimer();
+    });
+    document.getElementById('pauseBtn').addEventListener('click', ()=>{
+      pauseTimer();
+    });
+    document.getElementById('resetBtn').addEventListener('click', ()=>{
+      resetTimer();
+    });
+    document.getElementById('skipBtn').addEventListener('click', ()=>{
+      skipStage();
+    });
+    document.getElementById('setManual').addEventListener('click', ()=>{
+      const mins = Number(document.getElementById('manualMin').value) || 0;
+      if (mins<=0) return;
+      // set current stage to manual time or create a temp stage
+      if (currentIndex===-1){ stages.unshift({name:'Manual', seconds: mins*60}); currentIndex=0; }
+      else { stages[currentIndex].seconds = mins*60; }
+      persist(); renderStages(); updateUI();
+    });
+
+    document.getElementById('addStage').addEventListener('click', ()=>{
+      const name = document.getElementById('newName').value.trim() || 'Stage';
+      const sec = Math.max(1, Number(document.getElementById('newSeconds').value)||30);
+      stages.push({name, seconds: sec});
+      document.getElementById('newName').value=''; document.getElementById('newSeconds').value='';
+      persist(); renderStages(); renderPresetList();
+    });
+
+    document.getElementById('savePreset').addEventListener('click', ()=>{
+      const name = prompt('Preset name:');
+      if (!name) return; presets[name]=JSON.parse(JSON.stringify(stages)); persist(); renderPresetList();
+    });
+    document.getElementById('loadPreset').addEventListener('click', ()=>{
+      const name = presetSelect.value; if (!name) return; stages = JSON.parse(JSON.stringify(presets[name])); persist(); renderStages(); renderPresetList();
+    });
+
+    document.getElementById('presetList').addEventListener('click', (e)=>{
+      const load = e.target.dataset.load; const del = e.target.dataset.delete;
+      if (load) { stages = JSON.parse(JSON.stringify(presets[load])); persist(); renderStages(); }
+      if (del) { if (confirm('Delete preset '+del+'?')){ delete presets[del]; persist(); renderPresetList(); } }
+    });
+
+    // stage controls (delegated)
+    stagesEl.addEventListener('click', (e)=>{
+      const i = e.target.dataset.i;
+      if (e.target.dataset.move){
+        const idx = Number(i);
+        if (e.target.dataset.move === 'up' && idx>0){ const t = stages[idx-1]; stages[idx-1]=stages[idx]; stages[idx]=t; persist(); renderStages(); }
+        if (e.target.dataset.move === 'down' && idx<stages.length-1){ const t = stages[idx+1]; stages[idx+1]=stages[idx]; stages[idx]=t; persist(); renderStages(); }
+      }
+      if (e.target.dataset.del){ stages.splice(Number(e.target.dataset.del),1); persist(); renderStages(); }
+    });
+
+    // input binding for name/seconds
+    stagesEl.addEventListener('change', (e)=>{
+      const i = e.target.dataset.i ?? e.target.dataset.i2;
+      if (!i) return; const idx = Number(i);
+      if (e.target.type === 'text') stages[idx].name = e.target.value;
+      if (e.target.type === 'number') stages[idx].seconds = Math.max(1, Number(e.target.value)||1);
+      persist(); renderPresetList();
+    });
+
+    document.getElementById('exportCsv').addEventListener('click', ()=>{
+      const headers = ['when','action','stage','note'];
+      const rows = [headers.join(',')].concat(logEntries.map(r=> [r.when, (r.action||''), (r.stage||''), (r.note||'')].map(s=> '"'+String(s).replace(/"/g,'""')+'"').join(',')));
+      const blob = new Blob([rows.join('\n')], {type:'text/csv'});
+      const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='scacupping_log.csv'; a.click(); URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('clearLog').addEventListener('click', ()=>{ if (confirm('Clear log?')){ logEntries=[]; persist(); renderLog(); } });
+
+    // preset select change
+    presetSelect.addEventListener('change', ()=>{});
+
+    // small helpers
+    function init(){ renderStages(); renderPresetList(); renderLog(); updateUI(); }
+    init();
+  </script>
+</body>
+</html>
