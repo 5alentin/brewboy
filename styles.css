@@ -302,3 +302,160 @@ select {
   .lang-dropdown a:hover {
     background-color: #444;
   }
+
+/* ── Saved Recipes ────────────────────────────────────────── */
+#saved-recipes-section {
+  width: 80%;
+  max-width: 500px;
+  margin: 20px auto 0;
+}
+
+#saved-recipes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+#saved-recipes-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+#save-current-btn {
+  width: auto;
+  max-width: none;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.recipe-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  gap: 10px;
+}
+
+.recipe-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.recipe-name {
+  font-weight: bold;
+  font-size: 0.95rem;
+  color: #f0f0f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recipe-code {
+  font-size: 0.75rem;
+  color: #888;
+  margin-top: 2px;
+  font-family: 'Courier New', monospace;
+}
+
+.recipe-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.recipe-btn {
+  width: 34px;
+  max-width: none;
+  padding: 6px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  background-color: #3a3a3a;
+}
+
+.recipe-btn:hover {
+  background-color: #4f43ae;
+}
+
+.delete-btn:hover {
+  background-color: #8b2020 !important;
+}
+
+.no-recipes {
+  color: #666;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 12px 0;
+}
+
+/* ── Modal ────────────────────────────────────────────────── */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-box {
+  background: #2a2a2a;
+  border: 1px solid #555;
+  border-radius: 12px;
+  padding: 24px;
+  width: 85%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-box h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #f0f0f0;
+}
+
+.modal-box input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 8px;
+  color: #f0f0f0;
+  box-sizing: border-box;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.modal-buttons button {
+  flex: 1;
+  width: auto;
+  max-width: none;
+  padding: 10px;
+}
+
+#modal-cancel {
+  background-color: #3a3a3a;
+}
+
+#modal-cancel:hover {
+  background-color: #555;
+}

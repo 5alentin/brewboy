@@ -2,374 +2,699 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SCA Cupping Timer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>BrewBoy - Cupping Timer</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="icon.png" type="image/png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="manifest" href="manifest.json" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="BrewBoy" />
   <meta name="theme-color" content="#1e1e1e" />
   <style>
-    :root{--bg:#0f1724;--card:#2a2a2a;--muted:#9aa4b2;--accent:#60a5fa;--glass: rgba(255,255,255,0.03)}
-    *{box-sizing:border-box}
-    body{font-family: 'Courier New', monospace;;margin:0;background:linear-gradient(180deg, #2a2a2a 0%, #1f1f1f 100%);color:#f0f0f0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-    .app{width:980px;max-width:100%;display:grid;grid-template-columns:1fr 380px;gap:20px}
-    header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between}
-    h1{margin:0;font-size:20px}
-    p.lead{margin:0;color:var(--muted);font-size:13px}
-    .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 24px rgba(2,6,23,0.6);}
-    .timer-display{display:flex;align-items:center;gap:12px}
-    .big-time{font-size:48px;font-weight:700;letter-spacing:0.5px}
-    .sub{color:var(--muted);font-size:13px}
-    .controls{display:flex;gap:8px;margin-top:12px}
-    button{background:var(--glass);border:1px solid rgba(255,255,255,0.03);padding:10px 14px;border-radius:10px;color:inherit;cursor:pointer}
-    button.primary{background:linear-gradient(90deg, #8b5cf6, #a78bfa);border:none}
-    .preset-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
-    .preset{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02)}
-    .preset .name{font-weight:600}
-    label.small{font-size:12px;color:var(--muted)}
-    input[type=number], input[type=text], select{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
-    .sidebar{display:flex;flex-direction:column;gap:12px}
-    .stages{display:flex;flex-direction:column;gap:8px}
-    .stage-row{display:flex;gap:8px;align-items:center}
-    .stage-row input[type=text]{width:40%}
-    .stage-row input[type=number]{width:30%}
-    .stage-row .move{cursor:grab}
-    .log{max-height:360px;overflow:auto;padding:8px;background:rgba(255,255,255,0.02);border-radius:8px;font-size:13px}
-    .log-entry{padding:8px;border-bottom:1px dashed rgba(255,255,255,0.02)}
-    .footer{text-align: center; grid-column:1/-1;margin-top:8px;color:var(--muted);font-size:12px}
-    .small-btn{padding:6px 8px;font-size:13px}
-    .flex{display:flex;gap:8px;align-items:center}
-    @media (max-width:880px){.app{grid-template-columns:1fr;}.sidebar{order:2}}
+    /* Override body centering from styles.css - timer needs top-aligned scroll */
+    body {
+      display: block !important;
+      align-items: unset !important;
+      justify-content: unset !important;
+      padding: 0 !important;
+    }
+
+    .timer-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 72px 20px 60px;
+      max-width: 480px;
+      margin: 0 auto;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .timer-page h1 { font-size: 1.4rem; margin-bottom: 4px; }
+    .timer-subtitle { color: #888; font-size: 0.8rem; margin-bottom: 28px; }
+
+    /* Setup card */
+    .setup-card {
+      background: #2a2a2a;
+      border: 1px solid #444;
+      border-radius: 14px;
+      padding: 20px;
+      width: 100%;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+    }
+    .setup-card > label {
+      display: block;
+      font-size: 0.8rem;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    /* Cup selector */
+    .cup-selector {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 6px;
+    }
+    .cup-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      font-size: 1.4rem;
+      background: #3a3a3a;
+      border: 1px solid #555;
+      color: #f0f0f0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      max-width: none;
+      transition: background 0.2s;
+    }
+    .cup-btn:hover { background: #4f43ae; }
+    .cup-count {
+      font-size: 3rem;
+      font-weight: 700;
+      min-width: 60px;
+      text-align: center;
+      color: #f0f0f0;
+    }
+    .cup-label {
+      font-size: 0.78rem;
+      color: #666;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    /* Dry aroma prompt */
+    .dry-aroma-note {
+      background: #1e1e1e;
+      border: 1px solid #3a3a3a;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      color: #aaa;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+    .dry-aroma-note strong { color: #c8a96e; }
+
+    /* Toggles */
+    .section-label {
+      font-size: 0.8rem;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .alert-toggles { display: flex; flex-direction: column; gap: 10px; }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; }
+    .toggle-label { font-size: 0.9rem; color: #ccc; }
+    .toggle-switch { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0;
+      background: #444; border-radius: 24px; cursor: pointer; transition: background 0.2s;
+    }
+    .toggle-slider:before {
+      content: ''; position: absolute;
+      width: 18px; height: 18px; left: 3px; top: 3px;
+      background: #fff; border-radius: 50%; transition: transform 0.2s;
+    }
+    .toggle-switch input:checked + .toggle-slider { background: #4f43ae; }
+    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(18px); }
+
+    /* Stage editor */
+    .stage-editor { width: 100%; margin-bottom: 20px; }
+    .stage-editor-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+    }
+    .stage-editor-toggle {
+      font-size: 0.8rem; color: #7c71e0; background: none; border: none;
+      cursor: pointer; padding: 0; width: auto; max-width: none;
+    }
+    .stage-editor-toggle:hover { color: #a78bfa; background: none; }
+
+    .stage-list { display: flex; flex-direction: column; gap: 8px; }
+    .stage-edit-row {
+      display: flex; align-items: center; gap: 8px;
+      background: #2a2a2a; border: 1px solid #444; border-radius: 8px; padding: 8px 10px;
+      box-sizing: border-box;
+    }
+    .stage-edit-row input[type="text"] {
+      flex: 1; background: transparent; border: none; color: #f0f0f0;
+      font-family: 'Courier New', monospace; font-size: 0.9rem; padding: 0; outline: none;
+    }
+    .stage-edit-row input[type="number"] {
+      width: 60px; background: transparent; border: none; color: #a78bfa;
+      font-family: 'Courier New', monospace; font-size: 0.9rem; text-align: right; padding: 0; outline: none;
+    }
+    .stage-unit { color: #666; font-size: 0.8rem; flex-shrink: 0; }
+    .stage-del-btn {
+      background: none; border: none; color: #666; cursor: pointer;
+      padding: 0 2px; font-size: 0.9rem; width: auto; max-width: none; flex-shrink: 0;
+    }
+    .stage-del-btn:hover { color: #c0392b; background: none; }
+
+    .add-stage-row { display: flex; gap: 8px; margin-top: 8px; }
+    .add-stage-row input[type="text"] {
+      flex: 1; padding: 8px; background: #2a2a2a; border: 1px solid #444;
+      border-radius: 8px; color: #f0f0f0; font-family: 'Courier New', monospace; font-size: 0.85rem;
+    }
+    .add-stage-row input[type="number"] {
+      width: 70px; padding: 8px; background: #2a2a2a; border: 1px solid #444;
+      border-radius: 8px; color: #f0f0f0; font-family: 'Courier New', monospace; font-size: 0.85rem;
+    }
+    .add-stage-btn {
+      padding: 8px 14px; background: #3a3a3a; border: 1px solid #555;
+      border-radius: 8px; color: #f0f0f0; cursor: pointer; font-size: 0.85rem;
+      width: auto; max-width: none; white-space: nowrap;
+    }
+    .add-stage-btn:hover { background: #4f43ae; }
+    .reset-stages-btn {
+      margin-top: 8px; width: 100%; background: none; border: 1px solid #444;
+      border-radius: 8px; color: #888; font-size: 0.8rem; padding: 6px;
+      cursor: pointer; max-width: none;
+    }
+    .reset-stages-btn:hover { border-color: #666; color: #ccc; background: none; }
+
+    /* Start button */
+    #startCuppingBtn {
+      width: 100%; max-width: none; padding: 16px; font-size: 1.1rem;
+      background: linear-gradient(90deg, #4f43ae, #7c71e0); border: none;
+      border-radius: 12px; color: #fff; cursor: pointer; margin-bottom: 20px;
+      letter-spacing: 0.05em;
+    }
+    #startCuppingBtn:hover { background: linear-gradient(90deg, #7c71e0, #a78bfa); }
+
+    /* ── Dry aroma modal prompt ── */
+    .dry-modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 3000; padding: 20px; box-sizing: border-box;
+    }
+    .dry-modal.hidden { display: none; }
+    .dry-modal-box {
+      background: #2a2a2a; border: 1px solid #555; border-radius: 14px;
+      padding: 28px 24px; max-width: 360px; width: 100%; text-align: center;
+    }
+    .dry-modal-box .dry-icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .dry-modal-box h2 { margin: 0 0 10px; font-size: 1.2rem; }
+    .dry-modal-box p { color: #aaa; font-size: 0.9rem; line-height: 1.5; margin: 0 0 20px; }
+    .dry-modal-box button {
+      width: 100%; max-width: none; padding: 14px;
+      background: linear-gradient(90deg, #4f43ae, #7c71e0); border: none;
+      border-radius: 10px; color: #fff; font-size: 1rem; cursor: pointer;
+    }
+
+    /* ── Active timer ── */
+    #timer-view { display: none; width: 100%; }
+
+    .stage-progress {
+      display: flex; gap: 6px; justify-content: center;
+      margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .stage-pip {
+      height: 6px; border-radius: 3px; background: #3a3a3a;
+      transition: background 0.3s; flex: 1; min-width: 16px; max-width: 60px;
+    }
+    .stage-pip.done { background: #4f43ae; }
+    .stage-pip.active { background: #a78bfa; }
+
+    .stage-instruction {
+      background: #2a2a2a; border: 1px solid #555; border-radius: 12px;
+      padding: 16px 18px; text-align: center; margin-bottom: 20px; width: 100%;
+      box-sizing: border-box;
+    }
+    .instruction-label {
+      font-size: 0.72rem; color: #888; text-transform: uppercase;
+      letter-spacing: 0.08em; margin-bottom: 6px;
+    }
+    .instruction-text { font-size: 1rem; color: #f0f0f0; font-weight: 600; line-height: 1.4; }
+    .instruction-next { font-size: 0.78rem; color: #666; margin-top: 6px; }
+
+    .big-timer { text-align: center; margin-bottom: 20px; }
+    .time-display {
+      font-size: 5rem; font-weight: 700; letter-spacing: 2px;
+      line-height: 1; font-family: 'Courier New', monospace; transition: color 0.3s;
+    }
+    @media (max-width: 380px) { .time-display { font-size: 4rem; } }
+    .time-display.warning { color: #f0a500; }
+    .time-display.urgent  { color: #e74c3c; }
+    .stage-counter { font-size: 0.82rem; color: #888; margin-top: 6px; }
+
+    .timer-controls { display: flex; gap: 10px; width: 100%; margin-bottom: 14px; }
+    .timer-controls button {
+      flex: 1; padding: 14px; border-radius: 10px;
+      font-size: 0.95rem; max-width: none;
+    }
+    #pauseResumeBtn { background: linear-gradient(90deg, #4f43ae, #7c71e0); border: none; }
+    #skipStageBtn, #resetTimerBtn { background: #2a2a2a; border: 1px solid #444; }
+
+    .elapsed-bar-wrap {
+      width: 100%; height: 6px; background: #333;
+      border-radius: 3px; overflow: hidden; margin-bottom: 20px;
+    }
+    .elapsed-bar {
+      height: 100%; background: linear-gradient(90deg, #4f43ae, #a78bfa);
+      border-radius: 3px; transition: width 0.4s linear;
+    }
+
+    /* Flash overlay */
+    #flash-overlay {
+      position: fixed; inset: 0; background: white; opacity: 0;
+      pointer-events: none; z-index: 9999; transition: opacity 0.08s;
+    }
+
+    /* Done */
+    .done-message { text-align: center; padding: 30px 0; }
+    .done-message .done-icon { font-size: 3rem; margin-bottom: 10px; }
+    .done-message h2 { margin: 0 0 8px; font-size: 1.4rem; }
+    .done-message p { color: #888; font-size: 0.9rem; margin: 0 0 24px; line-height: 1.5; }
+    .done-reset-btn {
+      width: 100%; max-width: none; padding: 14px;
+      background: linear-gradient(90deg, #4f43ae, #7c71e0); border: none;
+      border-radius: 12px; font-size: 1rem; color: #fff; cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div>
-        <h1>SCA Cupping Timer</h1>
-        <p class="lead">Preset cupping stages</p>
-      </div>
-      <div class="flex">
-        <button id="exportCsv" class="small-btn">Export CSV</button>
-        <button id="clearLog" class="small-btn">Clear Log</button>
-      </div>
-    </header>
-
-    <main class="card">
-      <div class="timer-display">
-        <div>
-          <div class="big-time" id="timeLarge">00:00</div>
-          <div class="sub" id="stageLabel">Not started</div>
-        </div>
-        <div style="margin-left:auto;text-align:right;">
-          <div class="sub">Elapsed: <span id="elapsed">00:00</span></div>
-          <div class="sub">Remaining: <span id="remaining">--:--</span></div>
-        </div>
-      </div>
-
-      <div class="controls">
-        <button id="startBtn" class="primary">Start</button>
-        <button id="pauseBtn">Pause</button>
-        <button id="skipBtn">Skip Stage</button>
-        <button id="resetBtn">Reset</button>
-      </div>
-
-      <div style="margin-top:12px">
-        <label class="small">Manual timer control</label>
-        <div style="display:grid;grid-template-columns:1fr 80px;gap:8px;margin-top:8px">
-          <input type="number" id="manualMin" min="0" placeholder="minutes">
-          <button id="setManual">Set</button>
-        </div>
-      </div>
-
-      <section style="margin-top:16px">
-        <label class="small">Stage presets</label>
-        <div class="preset-list" id="presetList"></div>
-      </section>
-    </main>
-
-    <aside class="sidebar">
-      <div class="card">
-        <label class="small">Stages (name + seconds)</label>
-        <div class="stages" id="stages"></div>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <input type="text" id="newName" placeholder="e.g. Pour">
-          <input type="number" id="newSeconds" placeholder="sec" min="1">
-          <button id="addStage">Add</button>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button id="savePreset">Save Preset</button>
-          <select id="presetSelect"></select>
-          <button id="loadPreset">Load</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <label class="small">Activity log</label>
-        <div class="log" id="log"></div>
-      </div>
-    </aside>
-
-    <div class="footer">¯\_(ツ)_/¯</div>
+  <div class="hamburger-container">
+    <div class="hamburger" id="hamburger-icon">
+      <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    </div>
+    <nav class="menu" id="menu">
+      <ul>
+        <li><a href="index.html">BrewBoy</a></li>
+        <li><a href="TIMER.html">TIMER</a></li>
+        <li><a href="MR_TDS.html">MR.TDS</a></li>
+      </ul>
+    </nav>
   </div>
 
-  <audio id="pingSound">
-    <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=" type="audio/wav">
-  </audio>
+  <div id="flash-overlay"></div>
+
+  <!-- Dry aroma prompt modal -->
+  <div class="dry-modal hidden" id="dryAromaModal">
+    <div class="dry-modal-box">
+      <div class="dry-icon">^ܠ^</div>
+      <h2>Dry Aroma</h2>
+      <p>Evaluate the fragrance of the dry grounds before adding water.<br>Take your time - smell each cup.</p>
+      <button id="dryAromaDone">Ready to pour →</button>
+    </div>
+  </div>
+
+  <div class="timer-page">
+    <h1>cupping timer</h1>
+    <p class="timer-subtitle">SCA Protocol*</p>
+
+    <!-- Setup -->
+    <div id="setup-view">
+
+      <div class="setup-card">
+        <label>Number of Cups</label>
+        <div class="cup-selector">
+          <button class="cup-btn" id="cupDown">−</button>
+          <div class="cup-count" id="cupCount">5</div>
+          <button class="cup-btn" id="cupUp">+</button>
+        </div>
+        <div class="cup-label">Steep time adjusts automatically</div>
+
+        <span class="section-label">Alerts between stages</span>
+        <div class="alert-toggles">
+          <div class="toggle-row">
+            <span class="toggle-label">♬ Sound</span>
+            <label class="toggle-switch"><input type="checkbox" id="toggle-sound" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <span class="toggle-label">✴ Screen flash</span>
+            <label class="toggle-switch"><input type="checkbox" id="toggle-flash" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <span class="toggle-label">ᯤ Vibration</span>
+            <label class="toggle-switch"><input type="checkbox" id="toggle-vibrate" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <span class="toggle-label">⚠︎ Instructions</span>
+            <label class="toggle-switch"><input type="checkbox" id="toggle-instructions" checked><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-editor">
+        <div class="stage-editor-header">
+          <span class="section-label" style="margin:0">Stages</span>
+          <button class="stage-editor-toggle" id="editToggleBtn">Edit stages</button>
+        </div>
+        <div class="stage-list" id="stage-list"></div>
+        <div id="stage-edit-controls" style="display:none;">
+          <div class="add-stage-row">
+            <input type="text" id="newStageName" placeholder="Stage name" />
+            <input type="number" id="newStageSecs" placeholder="sec" min="1" />
+            <button class="add-stage-btn" id="addStageBtn">Add</button>
+          </div>
+          <button class="reset-stages-btn" id="resetStagesBtn">↺ Reset to SCA defaults</button>
+        </div>
+      </div>
+
+      <button id="startCuppingBtn">Start Cupping</button>
+    </div>
+
+    <!-- Active timer -->
+    <div id="timer-view">
+      <div class="stage-progress" id="stagePips"></div>
+      <div class="stage-instruction" id="instructionBox">
+        <div class="instruction-label">Now</div>
+        <div class="instruction-text" id="instructionNow">-</div>
+        <div class="instruction-next" id="instructionNext"></div>
+      </div>
+      <div class="big-timer">
+        <div class="time-display" id="timeDisplay">00:00</div>
+        <div class="stage-counter" id="stageCounter">Stage 1 of 5</div>
+      </div>
+      <div class="elapsed-bar-wrap">
+        <div class="elapsed-bar" id="elapsedBar" style="width:0%"></div>
+      </div>
+      <div class="timer-controls">
+        <button id="pauseResumeBtn">Pause</button>
+        <button id="skipStageBtn">Skip ▶</button>
+        <button id="resetTimerBtn">Reset</button>
+      </div>
+    </div>
+  </div>
 
   <script>
-    // Simple single-file stage timer logic
-    const defaultStages = [
-      {name: 'Steep (crust)', seconds: 240},
-      {name: 'Break crust', seconds: 10},
-      {name: 'Skim & cool', seconds: 180},
-      {name: 'First slurp window', seconds: 300}
-    ];
+    document.getElementById('hamburger-icon').addEventListener('click', () => {
+      document.getElementById('menu').classList.toggle('active');
+    });
 
-    let stages = JSON.parse(localStorage.getItem('scastages')) || defaultStages.slice();
-    let presets = JSON.parse(localStorage.getItem('scapresets')) || {};
+    // ── SCA stages ─────────────────────────────────────────
+    // Steep: 240s base + 15s per cup over 5
+    function buildDefaultStages(cups) {
+      const steepExtra = Math.max(0, cups - 5) * 15;
+      return [
+        {
+          name: 'Pour & Wet Aroma',
+          seconds: 240 + steepExtra,
+          instruction: 'Pour hot water over all cups. Note the wet aroma as you pour.',
+          next: 'Break the Crust'
+        },
+        {
+          name: 'Break the Crust',
+          seconds: 15 + (cups * 5),
+          instruction: 'Stir each cup 3 times, breaking the crust. Nose deeply and evaluate aroma.',
+          next: 'Clean Up'
+        },
+        {
+          name: 'Clean Up',
+          seconds: 60 + (cups * 15),
+          instruction: 'Use two spoons to skim grounds and foam from each cup. Let cool.',
+          next: 'First Slurp (~70°C)'
+        },
+        {
+          name: 'First Slurp (~70°C)',
+          seconds: 300,
+          instruction: 'Take a spoonful and spray loudly across the palate. Evaluate.',
+          next: 'Second Slurp (~60°C)'
+        },
+        {
+          name: 'Second Slurp (~60°C)',
+          seconds: 300,
+          instruction: 'Re-evaluate as cups cool.',
+          next: 'Done'
+        },
+      ];
+    }
+
+    // ── State ──────────────────────────────────────────────
+    let cups = parseInt(localStorage.getItem('cupping-cups') || '5');
+    let stages = JSON.parse(localStorage.getItem('cupping-stages') || 'null') || buildDefaultStages(cups);
+    let editMode = false;
     let currentIndex = -1;
     let running = false;
-    let startTs = null;
-    let stageStartTs = null;
-    let pausedAt = null;
-    let tickInterval = null;
-    let logEntries = JSON.parse(localStorage.getItem('scalog')) || [];
+    let startTs = null, stageStartTs = null, pausedAt = null, tickInterval = null;
 
-    // DOM refs
-    const timeLarge = document.getElementById('timeLarge');
-    const stageLabel = document.getElementById('stageLabel');
-    const elapsedEl = document.getElementById('elapsed');
-    const remainingEl = document.getElementById('remaining');
-    const presetList = document.getElementById('presetList');
-    const stagesEl = document.getElementById('stages');
-    const logEl = document.getElementById('log');
-    const presetSelect = document.getElementById('presetSelect');
+    // ── Audio ──────────────────────────────────────────────
+    let audioCtx = null;
+    function getAudioCtx() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      return audioCtx;
+    }
+    function playPing() {
+      if (!document.getElementById('toggle-sound').checked) return;
+      try {
+        const ctx = getAudioCtx();
+        const now = ctx.currentTime;
 
-    function formatTime(s){
-      if (s==null || isNaN(s)) return '--:--';
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(1400, now + 0.04);
+        osc.frequency.setValueAtTime(1400, now + 0.04);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc.start(now); osc.stop(now + 0.12);
+
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.connect(gain2); gain2.connect(ctx.destination);
+        osc2.type = 'square';
+        osc2.frequency.setValueAtTime(300, now + 0.15);
+        osc2.frequency.exponentialRampToValueAtTime(1400, now + 0.19);
+        gain2.gain.setValueAtTime(0.4, now + 0.15);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+        osc2.start(now + 0.15); osc2.stop(now + 0.28);
+      } catch(e) {}
+    }
+    function flashScreen() {
+      if (!document.getElementById('toggle-flash').checked) return;
+      const el = document.getElementById('flash-overlay');
+      el.style.opacity = '0.55';
+      setTimeout(() => { el.style.opacity = '0'; }, 180);
+    }
+    function vibrateDevice() {
+      if (!document.getElementById('toggle-vibrate').checked) return;
+      if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+    }
+    function triggerAlerts() { playPing(); flashScreen(); vibrateDevice(); }
+
+    // ── Cup selector ───────────────────────────────────────
+    document.getElementById('cupCount').textContent = cups;
+
+    function updateCups(val) {
+      cups = Math.max(1, Math.min(12, val));
+      document.getElementById('cupCount').textContent = cups;
+      localStorage.setItem('cupping-cups', cups);
+      if (!editMode) {
+        stages = buildDefaultStages(cups);
+        localStorage.setItem('cupping-stages', JSON.stringify(stages));
+        renderStageList();
+      }
+    }
+    document.getElementById('cupDown').addEventListener('click', () => updateCups(cups - 1));
+    document.getElementById('cupUp').addEventListener('click', () => updateCups(cups + 1));
+
+    // ── Stage list ─────────────────────────────────────────
+    function renderStageList() {
+      const list = document.getElementById('stage-list');
+      list.innerHTML = '';
+      stages.forEach((s, i) => {
+        const row = document.createElement('div');
+        row.className = 'stage-edit-row';
+        if (editMode) {
+          row.innerHTML = `
+            <input type="text" value="${s.name}" data-i="${i}" class="sname" />
+            <input type="number" value="${s.seconds}" min="1" data-i="${i}" class="ssecs" />
+            <span class="stage-unit">s</span>
+            <button class="stage-del-btn" data-i="${i}">✕</button>`;
+        } else {
+          const m = Math.floor(s.seconds / 60), sc = s.seconds % 60;
+          const t = m > 0 ? `${m}m${sc > 0 ? sc + 's' : ''}` : `${sc}s`;
+          row.innerHTML = `
+            <span style="flex:1;font-size:.88rem;line-height:1.3">${s.name}</span>
+            <span style="color:#a78bfa;font-size:.82rem;font-family:'Courier New',monospace;flex-shrink:0">${t}</span>`;
+        }
+        list.appendChild(row);
+      });
+
+      if (editMode) {
+        list.querySelectorAll('.sname').forEach(inp => inp.addEventListener('change', () => {
+          stages[+inp.dataset.i].name = inp.value;
+          localStorage.setItem('cupping-stages', JSON.stringify(stages));
+        }));
+        list.querySelectorAll('.ssecs').forEach(inp => inp.addEventListener('change', () => {
+          stages[+inp.dataset.i].seconds = Math.max(1, parseInt(inp.value) || 1);
+          localStorage.setItem('cupping-stages', JSON.stringify(stages));
+        }));
+        list.querySelectorAll('.stage-del-btn').forEach(btn => btn.addEventListener('click', () => {
+          stages.splice(+btn.dataset.i, 1);
+          localStorage.setItem('cupping-stages', JSON.stringify(stages));
+          renderStageList();
+        }));
+      }
+    }
+
+    document.getElementById('editToggleBtn').addEventListener('click', () => {
+      editMode = !editMode;
+      document.getElementById('editToggleBtn').textContent = editMode ? 'Done' : 'Edit stages';
+      document.getElementById('stage-edit-controls').style.display = editMode ? 'block' : 'none';
+      renderStageList();
+    });
+
+    document.getElementById('addStageBtn').addEventListener('click', () => {
+      const name = document.getElementById('newStageName').value.trim() || 'Stage';
+      const secs = Math.max(1, parseInt(document.getElementById('newStageSecs').value) || 60);
+      stages.push({ name, seconds: secs, instruction: name, next: '' });
+      localStorage.setItem('cupping-stages', JSON.stringify(stages));
+      document.getElementById('newStageName').value = '';
+      document.getElementById('newStageSecs').value = '';
+      renderStageList();
+    });
+
+    document.getElementById('resetStagesBtn').addEventListener('click', () => {
+      stages = buildDefaultStages(cups);
+      localStorage.setItem('cupping-stages', JSON.stringify(stages));
+      renderStageList();
+    });
+
+    // ── Dry aroma prompt ───────────────────────────────────
+    document.getElementById('startCuppingBtn').addEventListener('click', () => {
+      // Unlock audio context on user gesture
+      try { getAudioCtx().resume(); } catch(e) {}
+      document.getElementById('dryAromaModal').classList.remove('hidden');
+    });
+
+    document.getElementById('dryAromaDone').addEventListener('click', () => {
+      document.getElementById('dryAromaModal').classList.add('hidden');
+      startTimer();
+    });
+
+    // ── Timer ──────────────────────────────────────────────
+    function formatTime(s) {
       s = Math.max(0, Math.round(s));
-      const m = Math.floor(s/60).toString().padStart(2,'0');
-      const sec = (s%60).toString().padStart(2,'0');
-      return m+':'+sec;
+      return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
     }
 
-    function renderStages(){
-      stagesEl.innerHTML='';
-      stages.forEach((st, i)=>{
-        const row = document.createElement('div'); row.className='stage-row';
-        row.innerHTML = `
-          <input type="text" data-i="${i}" value="${st.name}">
-          <input type="number" data-i2="${i}" value="${st.seconds}" min="1">
-          <div style="margin-left:auto;display:flex;gap:6px">
-            <button class="small-btn" data-move="up" data-i="${i}">▲</button>
-            <button class="small-btn" data-move="down" data-i="${i}">▼</button>
-            <button class="small-btn" data-del="${i}">✖</button>
-          </div>`;
-        stagesEl.appendChild(row);
+    function renderPips() {
+      const c = document.getElementById('stagePips');
+      c.innerHTML = '';
+      stages.forEach((_, i) => {
+        const p = document.createElement('div');
+        p.className = 'stage-pip' + (i < currentIndex ? ' done' : i === currentIndex ? ' active' : '');
+        c.appendChild(p);
       });
     }
 
-    function renderPresetList(){
-      presetList.innerHTML='';
-      Object.keys(presets).forEach(name=>{
-        const el = document.createElement('div'); el.className='preset';
-        el.innerHTML = `<div><div class="name">${name}</div><div class="sub">${presets[name].length} stages</div></div>
-                        <div style="display:flex;gap:6px"><button data-load="${name}">Load</button><button data-delete="${name}">Del</button></div>`;
-        presetList.appendChild(el);
-      });
+    function updateTimerUI() {
+      if (currentIndex < 0 || currentIndex >= stages.length) return;
+      const now = pausedAt || Date.now();
+      const elapsed = Math.floor((now - (stageStartTs || now)) / 1000);
+      const remaining = Math.max(0, stages[currentIndex].seconds - elapsed);
+      const progress = Math.min(1, elapsed / stages[currentIndex].seconds);
 
-      // populate select
-      presetSelect.innerHTML='';
-      const opt = document.createElement('option'); opt.value=''; opt.textContent='— choose —'; presetSelect.appendChild(opt);
-      Object.keys(presets).forEach(p=>{ const o = document.createElement('option'); o.value=p; o.textContent=p; presetSelect.appendChild(o); });
-    }
+      const timeEl = document.getElementById('timeDisplay');
+      timeEl.textContent = formatTime(remaining);
+      timeEl.className = 'time-display' + (remaining <= 10 ? ' urgent' : remaining <= 30 ? ' warning' : '');
+      document.getElementById('stageCounter').textContent = `Stage ${currentIndex + 1} of ${stages.length}`;
+      document.getElementById('elapsedBar').style.width = (progress * 100) + '%';
 
-    function renderLog(){
-      logEl.innerHTML='';
-      logEntries.slice().reverse().forEach(e=>{
-        const div = document.createElement('div'); div.className='log-entry';
-        div.innerHTML = `<strong>${e.when}</strong> — <span style="color:var(--muted)">${e.stage}</span> — ${e.note || ''}`;
-        logEl.appendChild(div);
-      });
-    }
-
-    function persist(){
-      localStorage.setItem('scastages', JSON.stringify(stages));
-      localStorage.setItem('scapresets', JSON.stringify(presets));
-      localStorage.setItem('scalog', JSON.stringify(logEntries));
-    }
-
-    function startTimer(){
-      if (running) return;
-      if (currentIndex === -1) currentIndex = 0;
-      running = true;
-      if (!startTs) startTs = Date.now();
-      if (!stageStartTs) stageStartTs = Date.now();
-      if (pausedAt){ // resume
-        const pausedDur = Date.now() - pausedAt;
-        startTs += pausedDur; stageStartTs += pausedDur; pausedAt = null;
+      const showInstr = document.getElementById('toggle-instructions').checked;
+      document.getElementById('instructionBox').style.display = showInstr ? 'block' : 'none';
+      if (showInstr) {
+        document.getElementById('instructionNow').textContent = stages[currentIndex].instruction || stages[currentIndex].name;
+        const nextName = stages[currentIndex].next || (currentIndex + 1 < stages.length ? stages[currentIndex + 1].name : null);
+        document.getElementById('instructionNext').textContent = nextName ? `Up next: ${nextName}` : '';
       }
-      tickInterval = setInterval(tick, 200);
-      log(`Started`, stages[currentIndex]?.name || '—');
-      updateUI();
+      renderPips();
     }
 
-    function pauseTimer(){
-      if (!running) return;
-      running = false;
-      clearInterval(tickInterval); tickInterval = null;
-      pausedAt = Date.now();
-      log('Paused', stages[currentIndex]?.name || '—');
-      updateUI();
+    function tick() {
+      if (currentIndex < 0 || currentIndex >= stages.length) return;
+      const elapsed = Math.floor((Date.now() - stageStartTs) / 1000);
+      if (stages[currentIndex].seconds - elapsed <= 0) {
+        triggerAlerts();
+        if (currentIndex < stages.length - 1) {
+          currentIndex++;
+          stageStartTs = Date.now();
+        } else {
+          finishCupping(); return;
+        }
+      }
+      updateTimerUI();
     }
 
-    function resetTimer(){
-      clearInterval(tickInterval); tickInterval = null; running=false; startTs=null; stageStartTs=null; pausedAt=null; currentIndex=-1;
-      updateUI();
-      log('Reset', '—');
+    function startTimer() {
+      document.getElementById('setup-view').style.display = 'none';
+      document.getElementById('timer-view').style.display = 'block';
+      currentIndex = 0; running = true;
+      startTs = stageStartTs = Date.now();
+      tickInterval = setInterval(tick, 250);
+      updateTimerUI();
     }
 
-    function skipStage(){
-      if (currentIndex < stages.length-1) {
-        currentIndex++;
-        stageStartTs = Date.now();
-        ping();
-        log('Skippd to', stages[currentIndex].name);
+    function pauseResume() {
+      if (running) {
+        running = false; clearInterval(tickInterval); tickInterval = null;
+        pausedAt = Date.now();
+        document.getElementById('pauseResumeBtn').textContent = 'Resume';
       } else {
-        log('Finished', 'All stages');
-        resetTimer();
+        const dur = Date.now() - pausedAt;
+        startTs += dur; stageStartTs += dur; pausedAt = null;
+        running = true; tickInterval = setInterval(tick, 250);
+        document.getElementById('pauseResumeBtn').textContent = 'Pause';
       }
-      updateUI();
+      updateTimerUI();
     }
 
-    function tick(){
-      if (currentIndex<0 || currentIndex>=stages.length) return;
-      const now = Date.now();
-      const elapsedTotal = Math.floor((now - startTs)/1000);
-      const elapsedStage = Math.floor((now - stageStartTs)/1000);
-      const remainingStage = stages[currentIndex].seconds - elapsedStage;
-      // auto advance
-      if (remainingStage <= 0){
-        ping();
-        log('Stage end', stages[currentIndex].name);
-        if (currentIndex < stages.length-1){ currentIndex++; stageStartTs = Date.now(); }
-        else { log('All stages complete', '—'); resetTimer(); }
-      }
-      // UI
-      timeLarge.textContent = formatTime(Math.max(0, remainingStage));
-      stageLabel.textContent = `${stages[currentIndex].name} (${currentIndex+1}/${stages.length})`;
-      elapsedEl.textContent = formatTime(elapsedTotal);
-      remainingEl.textContent = formatTime(Math.max(0, remainingStage));
+    function skipStage() {
+      if (currentIndex < stages.length - 1) {
+        triggerAlerts(); currentIndex++; stageStartTs = Date.now();
+        if (pausedAt) pausedAt = Date.now();
+        updateTimerUI();
+      } else { finishCupping(); }
     }
 
-    function updateUI(){
-      // basic
-      if (currentIndex === -1) {
-        timeLarge.textContent='00:00'; stageLabel.textContent='Not started'; remainingEl.textContent='--:--'; elapsedEl.textContent='00:00';
-      } else if (!running){
-        // show stage remaining based on pausedAt
-        const now = pausedAt || Date.now();
-        const elapsedTotal = Math.floor((now - (startTs||now))/1000);
-        const elapsedStage = Math.floor((now - (stageStartTs||now))/1000);
-        const remainingStage = stages[currentIndex].seconds - elapsedStage;
-        timeLarge.textContent = formatTime(Math.max(0, remainingStage));
-        stageLabel.textContent = `${stages[currentIndex].name} (${currentIndex+1}/${stages.length})`;
-        elapsedEl.textContent = formatTime(elapsedTotal);
-        remainingEl.textContent = formatTime(Math.max(0, remainingStage));
-      }
+    function resetTimer() {
+      clearInterval(tickInterval); tickInterval = null;
+      running = false; currentIndex = -1;
+      startTs = stageStartTs = pausedAt = null;
+      document.getElementById('timer-view').style.display = 'none';
+      document.getElementById('setup-view').style.display = 'block';
+      document.getElementById('pauseResumeBtn').textContent = 'Pause';
+      renderStageList();
     }
 
-    function ping(){
-      try{ document.getElementById('pingSound').play().catch(()=>{}); }catch(e){}
+    function finishCupping() {
+      clearInterval(tickInterval); tickInterval = null; running = false;
+      triggerAlerts();
+      document.getElementById('timer-view').innerHTML = `
+        <div class="done-message">
+          <div class="done-icon">＼(＾O＾)／</div>
+          <h2>Cupping Complete</h2>
+          <p>All ${stages.length} stages finished.<br>Enjoy evaluating your cups!</p>
+          <button class="done-reset-btn" id="doneResetBtn">Start New Session</button>
+        </div>`;
+      document.getElementById('doneResetBtn').addEventListener('click', () => {
+        location.reload();
+      });
     }
 
-    function log(action, stage, note){
-      const when = new Date().toLocaleString();
-      logEntries.push({when, action, stage, note});
-      persist(); renderLog();
-    }
+    document.getElementById('pauseResumeBtn').addEventListener('click', pauseResume);
+    document.getElementById('skipStageBtn').addEventListener('click', skipStage);
+    document.getElementById('resetTimerBtn').addEventListener('click', resetTimer);
 
-    // UI events
-    document.getElementById('startBtn').addEventListener('click', ()=>{
-      if (!running) startTimer();
-    });
-    document.getElementById('pauseBtn').addEventListener('click', ()=>{
-      pauseTimer();
-    });
-    document.getElementById('resetBtn').addEventListener('click', ()=>{
-      resetTimer();
-    });
-    document.getElementById('skipBtn').addEventListener('click', ()=>{
-      skipStage();
-    });
-    document.getElementById('setManual').addEventListener('click', ()=>{
-      const mins = Number(document.getElementById('manualMin').value) || 0;
-      if (mins<=0) return;
-      // set current stage to manual time or create a temp stage
-      if (currentIndex===-1){ stages.unshift({name:'Manual', seconds: mins*60}); currentIndex=0; }
-      else { stages[currentIndex].seconds = mins*60; }
-      persist(); renderStages(); updateUI();
-    });
-
-    document.getElementById('addStage').addEventListener('click', ()=>{
-      const name = document.getElementById('newName').value.trim() || 'Stage';
-      const sec = Math.max(1, Number(document.getElementById('newSeconds').value)||30);
-      stages.push({name, seconds: sec});
-      document.getElementById('newName').value=''; document.getElementById('newSeconds').value='';
-      persist(); renderStages(); renderPresetList();
-    });
-
-    document.getElementById('savePreset').addEventListener('click', ()=>{
-      const name = prompt('Preset name:');
-      if (!name) return; presets[name]=JSON.parse(JSON.stringify(stages)); persist(); renderPresetList();
-    });
-    document.getElementById('loadPreset').addEventListener('click', ()=>{
-      const name = presetSelect.value; if (!name) return; stages = JSON.parse(JSON.stringify(presets[name])); persist(); renderStages(); renderPresetList();
-    });
-
-    document.getElementById('presetList').addEventListener('click', (e)=>{
-      const load = e.target.dataset.load; const del = e.target.dataset.delete;
-      if (load) { stages = JSON.parse(JSON.stringify(presets[load])); persist(); renderStages(); }
-      if (del) { if (confirm('Delete preset '+del+'?')){ delete presets[del]; persist(); renderPresetList(); } }
-    });
-
-    // stage controls (delegated)
-    stagesEl.addEventListener('click', (e)=>{
-      const i = e.target.dataset.i;
-      if (e.target.dataset.move){
-        const idx = Number(i);
-        if (e.target.dataset.move === 'up' && idx>0){ const t = stages[idx-1]; stages[idx-1]=stages[idx]; stages[idx]=t; persist(); renderStages(); }
-        if (e.target.dataset.move === 'down' && idx<stages.length-1){ const t = stages[idx+1]; stages[idx+1]=stages[idx]; stages[idx]=t; persist(); renderStages(); }
-      }
-      if (e.target.dataset.del){ stages.splice(Number(e.target.dataset.del),1); persist(); renderStages(); }
-    });
-
-    // input binding for name/seconds
-    stagesEl.addEventListener('change', (e)=>{
-      const i = e.target.dataset.i ?? e.target.dataset.i2;
-      if (!i) return; const idx = Number(i);
-      if (e.target.type === 'text') stages[idx].name = e.target.value;
-      if (e.target.type === 'number') stages[idx].seconds = Math.max(1, Number(e.target.value)||1);
-      persist(); renderPresetList();
-    });
-
-    document.getElementById('exportCsv').addEventListener('click', ()=>{
-      const headers = ['when','action','stage','note'];
-      const rows = [headers.join(',')].concat(logEntries.map(r=> [r.when, (r.action||''), (r.stage||''), (r.note||'')].map(s=> '"'+String(s).replace(/"/g,'""')+'"').join(',')));
-      const blob = new Blob([rows.join('\n')], {type:'text/csv'});
-      const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='scacupping_log.csv'; a.click(); URL.revokeObjectURL(url);
-    });
-
-    document.getElementById('clearLog').addEventListener('click', ()=>{ if (confirm('Clear log?')){ logEntries=[]; persist(); renderLog(); } });
-
-    // preset select change
-    presetSelect.addEventListener('change', ()=>{});
-
-    // small helpers
-    function init(){ renderStages(); renderPresetList(); renderLog(); updateUI(); }
-    init();
+    renderStageList();
   </script>
 </body>
 </html>

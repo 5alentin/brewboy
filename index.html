@@ -102,6 +102,27 @@
   <button id="save-custom-recipe" data-i18n="buttonCustom">Use Custom Recipe</button>
 </div>
 
+  <!-- Saved Recipes -->
+  <div id="saved-recipes-section">
+    <div id="saved-recipes-header">
+      <h2 data-i18n="savedRecipes">Saved Recipes</h2>
+      <button id="save-current-btn" data-i18n="saveCurrent">💾 Save Current</button>
+    </div>
+    <div id="saved-recipes-list"></div>
+  </div>
+
+  <!-- Save Recipe Modal -->
+  <div id="save-modal" class="modal hidden">
+    <div class="modal-box">
+      <h3 data-i18n="nameYourRecipe">Name your recipe</h3>
+      <input type="text" id="recipe-name-input" data-i18n-placeholder="recipeName" placeholder="e.g. My V60 Recipe" maxlength="40" />
+      <div class="modal-buttons">
+        <button id="modal-confirm" data-i18n="save">Save</button>
+        <button id="modal-cancel" data-i18n="cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     document.getElementById("hamburger-icon").addEventListener("click", function () {
       document.getElementById("menu").classList.toggle("active");
@@ -283,10 +304,17 @@
         optionBrighter: "Brighter",
         optionLighter: "Lighter",
         optionStronger: "Stronger",
+        savedRecipes: "Saved Recipes",
+        saveCurrent: "💾 Save Current",
+        nameYourRecipe: "Name your recipe",
+        save: "Save",
+        cancel: "Cancel",
+        noRecipes: "No saved recipes yet.",
         placeholders: {
           dose: "Enter dose in grams",
           ratio: "Enter ratio (e.g., 15)",
-          custom: "e.g., 25,25,25,25"
+          custom: "e.g., 25,25,25,25",
+          recipeName: "e.g. My V60 Recipe"
         }
       },
       es: {
@@ -309,10 +337,17 @@
         optionBrighter: "Más brillante",
         optionLighter: "Más ligero",
         optionStronger: "Más fuerte",
+        savedRecipes: "Recetas guardadas",
+        saveCurrent: "💾 Guardar actual",
+        nameYourRecipe: "Nombra tu receta",
+        save: "Guardar",
+        cancel: "Cancelar",
+        noRecipes: "Aún no hay recetas guardadas.",
         placeholders: {
           dose: "Ingrese dosis en gramos",
           ratio: "Ingrese relación (ej. 15)",
-          custom: "ej. 25,25,25,25"
+          custom: "ej. 25,25,25,25",
+          recipeName: "ej. Mi receta V60"
         }
       },
       ja: {
@@ -335,10 +370,17 @@
         optionBrighter: "明るめ",
         optionLighter: "薄め",
         optionStronger: "濃いめ",
+        savedRecipes: "保存済みレシピ",
+        saveCurrent: "💾 現在のレシピを保存",
+        nameYourRecipe: "レシピ名を入力",
+        save: "保存",
+        cancel: "キャンセル",
+        noRecipes: "保存済みのレシピはありません。",
         placeholders: {
           dose: "分量をグラムで入力",
           ratio: "比率を入力 (例: 15)",
-          custom: "例: 25,25,25,25"
+          custom: "例: 25,25,25,25",
+          recipeName: "例: マイV60レシピ"
         }
       }
     };
@@ -483,6 +525,120 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 
+
+  // ── Saved Recipes ──────────────────────────────────────────
+
+  function getSavedRecipes() {
+    try { return JSON.parse(localStorage.getItem('brewboy-recipes') || '[]'); }
+    catch { return []; }
+  }
+
+  function saveRecipes(recipes) {
+    localStorage.setItem('brewboy-recipes', JSON.stringify(recipes));
+  }
+
+  function buildShareURL(recipe) {
+    const base = window.location.origin + window.location.pathname;
+    return `${base}?custom=${encodeURIComponent(recipe.code)}`;
+  }
+
+  function renderSavedRecipes() {
+    const list = document.getElementById('saved-recipes-list');
+    const recipes = getSavedRecipes();
+    list.innerHTML = '';
+
+    if (recipes.length === 0) {
+      list.innerHTML = '<p class="no-recipes">No saved recipes yet.</p>';
+      return;
+    }
+
+    recipes.forEach((recipe, i) => {
+      const row = document.createElement('div');
+      row.className = 'recipe-row';
+      row.innerHTML = `
+        <div class="recipe-info">
+          <span class="recipe-name">${recipe.name}</span>
+          <span class="recipe-code">${recipe.code}</span>
+        </div>
+        <div class="recipe-actions">
+          <button class="recipe-btn load-btn" data-i="${i}" title="Load">▶</button>
+          <button class="recipe-btn share-btn" data-i="${i}" title="Share">🔗</button>
+          <button class="recipe-btn delete-btn" data-i="${i}" title="Delete">✕</button>
+        </div>`;
+      list.appendChild(row);
+    });
+
+    list.querySelectorAll('.load-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const recipe = getSavedRecipes()[+btn.dataset.i];
+        document.getElementById('custom-recipe-input').value = recipe.code;
+        document.getElementById('save-custom-recipe').click();
+        showToast(`Loaded: ${recipe.name}`);
+      });
+    });
+
+    list.querySelectorAll('.share-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const recipe = getSavedRecipes()[+btn.dataset.i];
+        const url = buildShareURL(recipe);
+        if (navigator.share) {
+          navigator.share({ title: recipe.name, url });
+        } else {
+          navigator.clipboard.writeText(url)
+            .then(() => showToast('Share link copied!'))
+            .catch(() => showToast('Failed to copy link.'));
+        }
+      });
+    });
+
+    list.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const recipes = getSavedRecipes();
+        const name = recipes[+btn.dataset.i].name;
+        recipes.splice(+btn.dataset.i, 1);
+        saveRecipes(recipes);
+        renderSavedRecipes();
+        showToast(`Deleted: ${name}`);
+      });
+    });
+  }
+
+  document.getElementById('save-current-btn').addEventListener('click', () => {
+    if (customRecipe.length === 0) {
+      showToast('No custom recipe loaded.');
+      return;
+    }
+    document.getElementById('save-modal').classList.remove('hidden');
+    document.getElementById('recipe-name-input').value = '';
+    document.getElementById('recipe-name-input').focus();
+  });
+
+  document.getElementById('modal-confirm').addEventListener('click', () => {
+    const name = document.getElementById('recipe-name-input').value.trim();
+    if (!name) { showToast('Please enter a name.'); return; }
+    const code = formatRecipeString();
+    const recipes = getSavedRecipes();
+    recipes.unshift({ name, code, savedAt: Date.now() });
+    saveRecipes(recipes);
+    renderSavedRecipes();
+    document.getElementById('save-modal').classList.add('hidden');
+    showToast(`Saved: ${name}`);
+  });
+
+  document.getElementById('modal-cancel').addEventListener('click', () => {
+    document.getElementById('save-modal').classList.add('hidden');
+  });
+
+  document.getElementById('recipe-name-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('modal-confirm').click();
+  });
+
+  document.getElementById('save-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('save-modal'))
+      document.getElementById('save-modal').classList.add('hidden');
+  });
+
+  renderSavedRecipes();
 
   </script>
 
