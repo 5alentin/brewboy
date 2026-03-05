@@ -7,7 +7,12 @@
     <link rel="stylesheet" href="styles.css" />
     <link rel="icon" href="favicon.ico" type="image/x-icon" />
     <link rel="icon" href="icon.png" type="image/png" />
-    <link rel="apple-touch-icon" href="icon.png" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="BrewBoy" />
+    <meta name="theme-color" content="#1e1e1e" />
 </head>
 
 <body>
@@ -26,9 +31,6 @@
     </nav>
   </div>
 
-  <div id="recipe-flash" style="display: none; padding: 10px; background: yellow; color: black; font-weight: bold; text-align: center; border: 2px solid black;">
-    <!---Recipe name placeholder-->
-  </div>
   <!-- Language selector button on top right -->
 <div class="lang-selector-container">
   <div class="lang-button" id="lang-button">🌐 ▼</div>
@@ -40,53 +42,53 @@
 </div>
 
 
-  <h1 id="title">BrewBoy v1.7</h1>
+  <h1 data-i18n="title">BrewBoy v1.7</h1>
 
   <div class="input-container">
       <div>
-          <label for="dose" id="label-dose">Dose (g):</label>
-          <input type="number" id="dose" placeholder="Enter dose in grams" inputmode="decimal" />
+          <label for="dose" data-i18n="labelDose">Dose (g):</label>
+          <input type="number" id="dose" data-i18n-placeholder="dose" placeholder="Enter dose in grams" inputmode="decimal" />
       </div>
       <div>
-          <label for="ratio" id="label-ratio">Ratio:</label>
-          <input type="number" id="ratio" placeholder="Enter ratio (e.g., 15)" inputmode="decimal" />
+          <label for="ratio" data-i18n="labelRatio">Ratio:</label>
+          <input type="number" id="ratio" data-i18n-placeholder="ratio" placeholder="Enter ratio (e.g., 15)" inputmode="decimal" />
       </div>
       <div>
-          <label for="water-output" id="label-water">Water:</label>
+          <label for="water-output" data-i18n="labelWater">Water:</label>
           <input type="text" id="water-output" readonly />
       </div>
   </div>
 
   <div class="dropdown-container">
       <div>
-          <label for="profile" id="label-profile">Profile:</label>
-          <select id="profile" >
-              <option id="option-standard" value="standard">Standard</option>
-              <option id="option-sweeter" value="sweeter">Sweeter</option>
-              <option id="option-brighter" value="brighter">Brighter</option>
+          <label for="profile" data-i18n="labelProfile">Profile:</label>
+          <select id="profile">
+              <option value="standard" data-i18n="optionStandard">Standard</option>
+              <option value="sweeter" data-i18n="optionSweeter">Sweeter</option>
+              <option value="brighter" data-i18n="optionBrighter">Brighter</option>
           </select>
           <p id="profile-description" class="description"></p>
       </div>
       <div>
-          <label for="strength" id="label-strength">Strength:</label>
+          <label for="strength" data-i18n="labelStrength">Strength:</label>
           <select id="strength">
-              <option id="option-lighter" value="lighter">Lighter</option>
-              <option id="option-standard" value="standard">Standard</option>
-              <option id="option-stronger" value="stronger">Stronger</option>
+              <option value="lighter" data-i18n="optionLighter">Lighter</option>
+              <option value="standard" data-i18n="optionStandard">Standard</option>
+              <option value="stronger" data-i18n="optionStronger">Stronger</option>
           </select>
       </div>
   </div>
 
-  <button id="calculate">Calculate</button>
+  <button id="calculate" data-i18n="buttonCalculate">Calculate</button>
 
-  <h2 class="hidden" id="results-header">Calculated Pulses</h2>
+  <h2 class="hidden" id="results-header" data-i18n="resultsHeader">Calculated Pulses</h2>
   <table id="result-table" class="hidden" border="1">
       <thead>
           <tr>
-            <th id="th-pulse">Pulse</th>
-            <th id="th-amount">Amount (g)</th>
-            <th id="th-percent">%</th>
-            <th id="th-total">Running Total</th>
+            <th data-i18n="pulse">Pulse</th>
+            <th data-i18n="amount">Amount (g)</th>
+            <th data-i18n="percent">%</th>
+            <th data-i18n="total">Running Total</th>
           </tr>
       </thead>
       <tbody>
@@ -95,9 +97,9 @@
   </table>
 
   <div id="custom-recipe-editor">
-  <label for="custom-recipe-input" id="label-custom">Custom Recipe Percentages (comma separated):</label>
-  <input type="text" id="custom-recipe-input" placeholder="e.g., 25,25,25,25" />
-  <button id="save-custom-recipe">Use Custom Recipe</button>
+  <label for="custom-recipe-input" data-i18n="labelCustom">Custom Recipe Percentages (comma separated):</label>
+  <input type="text" id="custom-recipe-input" data-i18n-placeholder="custom" placeholder="e.g., 25,25,25,25" />
+  <button id="save-custom-recipe" data-i18n="buttonCustom">Use Custom Recipe</button>
 </div>
 
   <script>
@@ -120,25 +122,11 @@
     document.getElementById("dose").addEventListener("input", updateWaterOutput);
     document.getElementById("ratio").addEventListener("input", updateWaterOutput);
 
-    const profileDescriptions = {
-      standard: "",
-      sweeter: "",
-      brighter: "",
-      custom: "",
-    };
+    document.getElementById("profile").addEventListener("change", updateProfileDescription);
 
     function updateProfileDescription() {
-      const profile = document.getElementById("profile").value;
-      if (profile === "custom") {
-        document.getElementById("profile-description").textContent =
-          profileDescriptions.custom;
-      } else {
-        document.getElementById("profile-description").textContent =
-          profileDescriptions[profile] || "";
-      }
+      // placeholder for future profile descriptions
     }
-
-    document.getElementById("profile").addEventListener("change", updateProfileDescription);
 
     // Manage custom recipe as full pulse breakdown, replacing profile + strength
     let customRecipe = [];
@@ -290,6 +278,11 @@
         amount: "Amount (g)",
         percent: "%",
         total: "Running Total",
+        optionStandard: "Standard",
+        optionSweeter: "Sweeter",
+        optionBrighter: "Brighter",
+        optionLighter: "Lighter",
+        optionStronger: "Stronger",
         placeholders: {
           dose: "Enter dose in grams",
           ratio: "Enter ratio (e.g., 15)",
@@ -311,6 +304,11 @@
         amount: "Cantidad (g)",
         percent: "%",
         total: "Total acumulado",
+        optionStandard: "Estándar",
+        optionSweeter: "Más dulce",
+        optionBrighter: "Más brillante",
+        optionLighter: "Más ligero",
+        optionStronger: "Más fuerte",
         placeholders: {
           dose: "Ingrese dosis en gramos",
           ratio: "Ingrese relación (ej. 15)",
@@ -332,6 +330,11 @@
         amount: "量 (g)",
         percent: "%",
         total: "累積合計",
+        optionStandard: "標準",
+        optionSweeter: "甘め",
+        optionBrighter: "明るめ",
+        optionLighter: "薄め",
+        optionStronger: "濃いめ",
         placeholders: {
           dose: "分量をグラムで入力",
           ratio: "比率を入力 (例: 15)",
@@ -340,29 +343,26 @@
       }
     };
 
+    const langNames = { en: "en", es: "🇵🇷", ja: "🇯🇵" };
+
     function applyTranslations(lang) {
       const t = translations[lang];
       if (!t) return;
-      document.getElementById("title").textContent = t.title;
-      document.getElementById("label-dose").textContent = t.labelDose;
-      document.getElementById("label-ratio").textContent = t.labelRatio;
-      document.getElementById("label-water").textContent = t.labelWater;
-      document.getElementById("label-profile").textContent = t.labelProfile;
-      document.getElementById("label-strength").textContent = t.labelStrength;
-      document.getElementById("label-custom").textContent = t.labelCustom;
-      document.getElementById("calculate").textContent = t.buttonCalculate;
-      document.getElementById("save-custom-recipe").textContent = t.buttonCustom;
-      document.getElementById("results-header").textContent = t.resultsHeader;
-      document.getElementById("th-pulse").textContent = t.pulse;
-      document.getElementById("th-amount").textContent = t.amount;
-      document.getElementById("th-percent").textContent = t.percent;
-      document.getElementById("th-total").textContent = t.total;
-      document.getElementById("dose").placeholder = t.placeholders.dose;
-      document.getElementById("ratio").placeholder = t.placeholders.ratio;
-      document.getElementById("custom-recipe-input").placeholder = t.placeholders.custom;
 
-      const langNames = { en: "en", es: "🇯🇵", ja: "🇯🇵" };
-      document.getElementById("lang-button").textContent = "🌐";
+      // Apply text content to all elements with data-i18n
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (t[key] !== undefined) el.textContent = t[key];
+      });
+
+      // Apply placeholders to all elements with data-i18n-placeholder
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (t.placeholders?.[key]) el.placeholder = t.placeholders[key];
+      });
+
+      document.getElementById("lang-button").textContent = (langNames[lang] || "🌐") + " ▼";
+      document.documentElement.lang = lang;
     }
 
     // Language dropdown toggle
@@ -393,6 +393,13 @@
 
     // Initialize with English
     applyTranslations("en");
+
+    // Register service worker for PWA offline support
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js');
+      });
+    }
 //adding copying
 function showToast(message) {
   const toast = document.getElementById("copy-toast");
@@ -494,7 +501,6 @@ window.addEventListener('DOMContentLoaded', () => {
     z-index: 1000;
     pointer-events: none;
   ">
-    Recipe copied to clipboard!
   </div>
 
 </body>
